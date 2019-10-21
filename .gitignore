@@ -9,7 +9,6 @@ precal_timing_tests.R
 *.rds
 fortran/*.so
 fortran/obj/*.o
-fortran/Makefile
 figures/
 R/old
 output
