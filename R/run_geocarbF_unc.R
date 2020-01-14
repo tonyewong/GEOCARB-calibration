@@ -68,7 +68,8 @@ run_geocarbF <- function(Matrix_56,
                           ageN      = as.integer(ageN),
                           iteration_threshold = as.integer(iteration_threshold),
                           CO2_out   = as.double(rep(-999.99, ageN)),
-                          O2_out    = as.double(rep(-999.99, ageN))
+                          O2_out    = as.double(rep(-999.99, ageN)),
+                          temp_out  = as.double(rep(-999.99, ageN))
                           )
   # r version
   ###f.output <- GEOCARBSULFvolc_forMCMC(Matrix_56_ordered, Matrix_12_ordered, age, ageN)

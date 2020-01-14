@@ -7,7 +7,7 @@
 !================================================================================
 
 !---------------------------------------------------------------------------------
-subroutine run_geocarb_unc(Matrix_56, Matrix_12, age, ageN, iteration_threshold, CO2_out, O2_out)
+subroutine run_geocarb_unc(Matrix_56, Matrix_12, age, ageN, iteration_threshold, CO2_out, O2_out, temp_out)
 !  ===============================================================================
 ! | Inputs:
 ! |    Variables:
@@ -22,6 +22,7 @@ subroutine run_geocarb_unc(Matrix_56, Matrix_12, age, ageN, iteration_threshold,
 ! | Outputs:
 ! |     CO2_out	    Modeled CO2 results [ppmv]
 ! |     O2_out	    Modeled O2 results [%]
+! |     temp_out	  Modeled temperature results [deg C relative to present]
 !  =========================================================================
 
 implicit none
@@ -41,6 +42,7 @@ real(DP), dimension(58,ageN), intent(IN) :: Matrix_12 ! 12 time-series parameter
 ! explicit output
 real(DP), dimension(ageN), intent(OUT) :: CO2_out
 real(DP), dimension(ageN), intent(OUT) :: O2_out
+real(DP), dimension(ageN), intent(OUT) :: temp_out
 
 ! local quantities
 real(DP) :: var       ! variance statistical parameter (not used in here)
@@ -551,6 +553,7 @@ Rca = Rca_570
         if (failed_run) then
           !RCO2 = 10.0                                 ! reset RCO2 seed for next run
         end if
+        temp_out(i) = GCM*log(RCO2)
 
         ! test for estimated oxygen at present-day to be between 19-23%, and
         ! estimated CO2 at present-day to be between 200-300 ppm; if not, the
