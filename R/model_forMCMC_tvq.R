@@ -26,6 +26,7 @@
 ##  age              age, in millinos of years
 ##  co2              CO2 concentration, ppmv
 ##  o2               O2 concentration, ppmv
+##  temp             temperature, deg C
 ##
 ## Questions? Tony Wong (aewsma@rit.edu)
 ##==============================================================================
@@ -95,8 +96,8 @@ model_forMCMC <- function(par_calib, par_fixed, parnames_calib, parnames_fixed, 
   # for r version
   ###GEOCARB_output <- cbind(age, geoRes$CO2, geoRes$O2)
   # for fortran version
-  GEOCARB_output <- cbind(geoRes$age, geoRes$CO2_out, geoRes$O2_out)
-  colnames(GEOCARB_output) <- c('age','co2','o2')
+  GEOCARB_output <- cbind(geoRes$age, geoRes$CO2_out, geoRes$O2_out, geoRes$temp_out)
+  colnames(GEOCARB_output) <- c('age','co2','o2','temp')
 
 
   return(GEOCARB_output)

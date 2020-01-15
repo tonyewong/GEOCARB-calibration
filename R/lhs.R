@@ -182,10 +182,29 @@ for (t in 1:n_time) {
     model_quantiles[t,1:length(quantiles_i_want)] <- quantile(model_good[t,], quantiles_i_want)
 }
 
+# get temperatures
+temp_good <- 0*model_good
+for (ii in 1:ncol(model_good)) {temp_good[,ii] <- parameters_good[ii,"deltaT2X"]*log(model_good[,ii]/250)/log(2)}
+
+# 7.4*age correction as in Mills et al 2019
+temp_corr <- temp_good
+for (tt in 1:58) {temp_corr[tt,] <- temp_good[tt,] - 7.4*age[tt]/570}
+
+# normalize relative to "present" (t=0 Mya)
+for (ii in 1:ncol(temp_corr)) {temp_corr[,ii] <- temp_corr[,ii] - temp_corr[58,ii]}
+
+# get temperature quantiles
+temp_quantiles <- mat.or.vec(nr=n_time, nc=(length(quantiles_i_want)+1))
+colnames(temp_quantiles) <- c('q000','q005','q025','q05','q50','q95','q975','q995','q100','maxpost')
+for (t in 1:n_time) {
+    temp_quantiles[t,1:length(quantiles_i_want)] <- quantile(temp_corr[t,], quantiles_i_want)
+}
+
+
 ## Log scale (model and points, with CO2 and age error bars, no likelihood surface, but with Royer et al 2014 too)
 ## MS FIGURE 2
 
-pdf(paste(plot.dir,'precal_out.pdf',sep=''),width=4,height=3,colormodel='cmyk', pointsize=11)
+pdf(paste(plot.dir,'precal_co2.pdf',sep=''),width=4,height=3,colormodel='cmyk', pointsize=11)
 par(mfrow=c(1,1), mai=c(.65,.9,.15,.15))
 plot(-time, log10(model_quantiles[,'q50']), type='l', xlim=c(-450,0), ylim=c(0.7,log10(30000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 #polygon(-c(time,rev(time)), log10(c(model_quantiles[,'q025'],rev(model_quantiles[,'q975']))), col=rgb(.2,.6,.6,.5), border=NA)
@@ -208,6 +227,31 @@ legend(-452, log10(85), c('data','median'), pch=c(16,NA), lty=c(NA,1), col=c('bl
 legend(-452, log10(35), c('min-max range','95% range'), pch=c(15), col=c('gray60','gray80'), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
 minor.tick(nx=5, ny=0, tick.ratio=0.5)
 dev.off()
+
+pdf(paste(plot.dir,'precal_temp.pdf',sep=''),width=4,height=3,colormodel='cmyk', pointsize=11)
+par(mfrow=c(1,1), mai=c(.65,.9,.15,.15))
+plot(-time, log10(temp_quantiles[,'q50']), type='l', xlim=c(-450,0), ylim=c(0.7,log10(30000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+#polygon(-c(time,rev(time)), log10(c(model_quantiles[,'q025'],rev(model_quantiles[,'q975']))), col=rgb(.2,.6,.6,.5), border=NA)
+polygon(-c(time,rev(time)), log10(c(model_quantiles[,'q000'],rev(model_quantiles[,'q100']))), col="gray60", border=NA)
+polygon(-c(time,rev(time)), log10(c(model_quantiles[,'q025'],rev(model_quantiles[,'q975']))), col="gray80", border=NA)
+lines(-time, log10(model_quantiles[,'q50']), lwd=2, col='black')
+#lines(-time, log10(model_quantiles[,'q50']), lwd=2, col=rgb(.2,.6,.6))
+points(-data_calib$age, log10(data_calib$co2), pch=16, cex=0.4, lwd=.4)
+for (ii in 1:nrow(data_calib)) {
+    arrows(-data_calib$age[ii], log10(data_calib$co2_low[ii]), -data_calib$age[ii], log10(data_calib$co2_high[ii]), length=0.02, angle=90, code=3, lwd=0.25)
+    arrows(-data_calib$age_old[ii], log10(data_calib$co2[ii]), -data_calib$age_young[ii], log10(data_calib$co2[ii]), length=0.02, angle=90, code=3, lwd=0.25)
+}
+mtext('Time [Myr ago]', side=1, line=2.1)
+mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.2)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+ticks=log10(c(seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,30000,10000)))
+axis(2, at=ticks, labels=rep('',length(ticks)))
+axis(2, at=log10(c(10,30,100,300,1000,3000,10000,30000)), labels=c('10','30','100','300','1000','3000','10000','30000'), las=1)
+legend(-452, log10(85), c('data','median'), pch=c(16,NA), lty=c(NA,1), col=c('black','black'), pt.cex=0.8, cex=.6, bty='n')
+legend(-452, log10(35), c('min-max range','95% range'), pch=c(15), col=c('gray60','gray80'), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
+minor.tick(nx=5, ny=0, tick.ratio=0.5)
+dev.off()
+
 
 
 
