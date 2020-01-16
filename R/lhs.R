@@ -34,7 +34,7 @@ library(Hmisc)
 
 ## Set testing number of samples and file name appendix here
 ## if there aren't enough samples on the MCMC output file, will break.
-n_sample <- 1e5 # note this will be doubled if using LHS precalibration
+n_sample <- 2e5 # note this will be doubled if using LHS precalibration
 appen <- 'final'
 
 n_node <- 6 # use parallel evaluation of ensembles in Sobol' integration?
@@ -84,7 +84,7 @@ n_parameters <- length(parnames_calib)
 ## scale up to the actual parameter distributions
 
 ## draw parameters by Latin Hypercube (Sample)
-set.seed(2019)
+set.seed(2020)
 parameters_lhs <- randomLHS(n_sample, n_parameters)
 par_calib <- parameters_lhs  # initialize
 
@@ -135,7 +135,7 @@ time <- model_out[,1]
 
 ## run the ensemble
 tbeg <- proc.time()
-model_out <- sapply(1:n_sample, function(ss) {
+model_co2 <- sapply(1:n_sample, function(ss) {
                     model_forMCMC(par_calib=par_calib[ss,],
                                   par_fixed=par_fixed0,
                                   parnames_calib=parnames_calib,
@@ -153,6 +153,28 @@ model_out <- sapply(1:n_sample, function(ss) {
                                   do_sample_tvq=DO_SAMPLE_TVQ,
                                   par_time_center=par_time_center,
                                   par_time_stdev=par_time_stdev)[,'co2']})
+
+# get the temperatures
+model_temp <- 0*model_co2
+for (ii in 1:ncol(model_co2)) {model_temp[,ii] <- par_calib[ii,"deltaT2X"]*log(model_co2[,ii]/250)/log(2)}
+
+# 7.4*age correction as in Mills et al 2019
+##model_temp_corr <- model_temp
+for (tt in 1:58) {model_temp[tt,] <- model_temp[tt,] - 7.4*age[tt]/570}
+
+# normalize relative to "present" (t=0 Mya)
+for (ii in 1:ncol(model_temp)) {model_temp[,ii] <- model_temp[,ii] - model_temp[58,ii]}
+
+# try the percent-outbound approach of Mill et al 2019 (Gondwana Research)
+source('percent_outbound.R')
+source('constraints.R')
+source('temperature_constraints.R')
+prcout_co2 <- sapply(1:n_sample, function(ss) {percout(model_co2[,ss], windows)})
+prcout_temp <- sapply(1:n_sample, function(ss) {percout(model_temp[,ss], windows_temp)})
+
+
+
+if(FALSE) {
 ibad <- NULL
 for (ss in 1:n_sample) {
   if( any(model_out[,ss] < windows[,"low"]) | any(model_out[,ss] > windows[,"high"]) ) {
@@ -167,6 +189,9 @@ tend <- proc.time()
 # report success rate
 print(paste('precalibration took ',(tend[3]-tbeg[3])/60,' minutes', sep=''))
 print(paste('with success rate of ',nrow(parameters_good),'/',n_sample, sep=''))
+}
+
+
 
 # show model hindcasts against the observational data
 
@@ -181,17 +206,6 @@ colnames(model_quantiles) <- c('q000','q005','q025','q05','q50','q95','q975','q9
 for (t in 1:n_time) {
     model_quantiles[t,1:length(quantiles_i_want)] <- quantile(model_good[t,], quantiles_i_want)
 }
-
-# get temperatures
-temp_good <- 0*model_good
-for (ii in 1:ncol(model_good)) {temp_good[,ii] <- parameters_good[ii,"deltaT2X"]*log(model_good[,ii]/250)/log(2)}
-
-# 7.4*age correction as in Mills et al 2019
-temp_corr <- temp_good
-for (tt in 1:58) {temp_corr[tt,] <- temp_good[tt,] - 7.4*age[tt]/570}
-
-# normalize relative to "present" (t=0 Mya)
-for (ii in 1:ncol(temp_corr)) {temp_corr[,ii] <- temp_corr[,ii] - temp_corr[58,ii]}
 
 # get temperature quantiles
 temp_quantiles <- mat.or.vec(nr=n_time, nc=(length(quantiles_i_want)+1))

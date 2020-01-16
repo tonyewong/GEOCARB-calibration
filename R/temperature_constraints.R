@@ -34,14 +34,19 @@ data_temps <- read.csv(filename.temperature, col.names=c('time','co2_max','co2_m
 #    upper |--> average + nsig*(upper - average)
 #    lower |--> average - nsig*(average - lower)
 
-temp_upper <- data_temps[,"T_avg"] + nsig*(data_temps[,"T_max"]-data_temps[,"T_avg"])
-temp_lower <- data_temps[,"T_avg"] - nsig*(data_temps[,"T_avg"]-data_temps[,"T_min"])
+#temp_upper <- data_temps[,"T_avg"] + nsig*(data_temps[,"T_max"]-data_temps[,"T_avg"])
+#temp_lower <- data_temps[,"T_avg"] - nsig*(data_temps[,"T_avg"]-data_temps[,"T_min"])
+temp_upper <- data_temps[,"T_avg"] + (data_temps[,"T_max"]-data_temps[,"T_avg"])
+temp_lower <- data_temps[,"T_avg"] - (data_temps[,"T_avg"]-data_temps[,"T_min"])
 
 # normalize relative to "present"
-subtract <- data_temps[1,"Tavg"]
+subtract <- data_temps[1,"T_avg"]
 temp_upper <- temp_upper - subtract
 temp_lower <- temp_lower - subtract
 
+windows_temp <- cbind(temp_lower, temp_upper)
+idx_temp <- match(-age, data_temps[,"time"])
+windows_temp <- windows_temp[idx_temp,]
 
 ##==============================================================================
 ## End

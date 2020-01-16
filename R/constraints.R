@@ -57,8 +57,6 @@ windows[58,"high"] <- 400
 
 if (FALSE) {
 
-
-}
 ibad <- NULL
 for (ss in 1:n_sample) {
   if( any(model_out[,ss] < .lower_bound_co2) |
@@ -73,6 +71,7 @@ n_time <- nrow(model_out)
 parameters_good <- par_calib[-ibad,]
 model_good <- model_out[,-ibad]
 tend <- proc.time()
+}
 
 
 ##==============================================================================
