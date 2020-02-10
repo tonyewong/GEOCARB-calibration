@@ -1,5 +1,5 @@
 # Define "all"
-all: run_geocarb.so run_geocarb_unc.so
+all: run_geocarb.so
 
 # Fortran compiler:
 F90 = /usr/local/bin/gfortran
@@ -27,9 +27,6 @@ Flags = ${SOFlags} -fno-range-check #$(Modpath)
 run_geocarb.so: $(OP)/run_geocarb.o
 	$(F90) -o $@ $(Flags) -shared $(Incl) $^
 
-run_geocarb_unc.so: $(OP)/run_geocarb_unc.o
-	$(F90) -o $@ $(Flags) -shared $(Incl) $^
-
 # ==============================================================
 ## Main Object files ##
 # ==============================================================
@@ -37,9 +34,6 @@ run_geocarb_unc.so: $(OP)/run_geocarb_unc.o
 ## GEOCARB ##
 $(OP)/run_geocarb.o: $(SP)/run_geocarb.f90
 	$(F90) -c $(Flags) $(Incl) $(SP)/run_geocarb.f90 -o $@
-
-$(OP)/run_geocarb_unc.o: $(SP)/run_geocarb_unc.f90
-	$(F90) -c $(Flags) $(Incl) $(SP)/run_geocarb_unc.f90 -o $@
 
 .PHONY: clean
 

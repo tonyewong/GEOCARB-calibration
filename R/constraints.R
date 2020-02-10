@@ -28,7 +28,7 @@ if (TRUE) {
 
 ## for each time period, pool the observations from that 10 Myr slice
 
-nsig <- 4
+nsig <- 1
 windows <- mat.or.vec(n_time, 2)
 colnames(windows) <- c("low","high")
 

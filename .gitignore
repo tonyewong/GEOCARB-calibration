@@ -9,6 +9,7 @@ precal_timing_tests.R
 *.rds
 fortran/*.so
 fortran/obj/*.o
+devansh/
 figures/
 R/old
 output

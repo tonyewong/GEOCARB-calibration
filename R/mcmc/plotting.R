@@ -21,7 +21,7 @@
 
 rm(list=ls())
 
-setwd('~/codes/GEOCARB/R')
+setwd('~/codes/GEOCARB-calibration/R')
 plot.dir <- '../figures/'
 load('../output/analysis_06Oct2019.RData')
 

@@ -63,10 +63,9 @@ model_forMCMC <- function(par_calib, par_fixed, parnames_calib, parnames_fixed, 
   # set up the time-constant parameter matrices
   # first length(ind_const_calib) values are the calibration parameters
   # then the fixed values come at the end
-  Matrix_56_unordered <- matrix(c(par_calib[ind_const_calib], par_fixed[ind_const_fixed]),
-                      nrow=N_const_total, ncol=1)
+  Matrix_56_unordered <- matrix(c(par_calib[ind_const_calib], par_fixed[ind_const_fixed]), nrow=N_const_total, ncol=1)
   rownames(Matrix_56_unordered) <- c( parnames_calib[ind_const_calib],
-                            parnames_fixed[ind_const_fixed] )
+                                      parnames_fixed[ind_const_fixed] )
 
   # set up the time-varying parameter matrices
   # rows = time, col = different time series
@@ -98,7 +97,6 @@ model_forMCMC <- function(par_calib, par_fixed, parnames_calib, parnames_fixed, 
   # for fortran version
   GEOCARB_output <- cbind(geoRes$age, geoRes$CO2_out, geoRes$O2_out, geoRes$temp_out)
   colnames(GEOCARB_output) <- c('age','co2','o2','temp')
-
 
   return(GEOCARB_output)
 }

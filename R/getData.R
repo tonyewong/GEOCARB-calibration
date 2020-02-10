@@ -34,17 +34,21 @@ for (i in 1:n_data_sets) {
 }
 data_calib <- data_calib_all[unlist(ind_assim),]
 
+# TODO -- here bin the data centered at 10Myr slots
+
 # assumption of steady state in-between model time steps permits figuring out
 # which model time steps each data point should be compared against in advance.
 # doing this each calibration iteration would be outrageous!
 # This assumes the model time step is 10 million years, seq(570,0,by=-10). The
 # model will choke later (in calibration) if this is not consistent with what is
 # set within the actual GEOCARB physical model.
-age_tmp <- seq(570,0,by=-10)
-ttmp <- 10*ceiling(data_calib$age/10)
-ind_mod2obs <- rep(NA,nrow(data_calib))
-for (i in 1:length(ind_mod2obs)){
-  ind_mod2obs[i] <- which(age_tmp==ttmp[i])
+tstep <- 10
+age_tmp <- seq(570,0,by=-tstep)
+ind_mod2obs <- rep(NA, length(data_calib$age))
+for (ii in 1:length(age_tmp)) {
+  idx <- which( (data_calib$age < age_tmp[ii]+.5*tstep) &
+                (data_calib$age >= age_tmp[ii]-.5*tstep) )
+  ind_mod2obs[idx] <- ii
 }
 
 ##==============================================================================

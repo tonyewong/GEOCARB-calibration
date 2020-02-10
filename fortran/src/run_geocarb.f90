@@ -1,13 +1,13 @@
 !================================================================================
 !================================================================================
 ! run_geocarb: Fortran 90 file for GEOCARBSULFvolc model
-! This file is written by Ying Cui (ying.cui@dartmouth.edu) and Tony Wong (twong@psu.edu)
+! This file is written by Ying Cui (ying.cui@dartmouth.edu) and Tony Wong (aewsma@rit.edu)
 !================================================================================
 ! This file is part of MCMC calibration for GEOCARBSULFvolc.
 !================================================================================
 
 !---------------------------------------------------------------------------------
-subroutine run_geocarb(Matrix_56, Matrix_12, age, ageN, iteration_threshold, CO2_out, O2_out)
+subroutine run_geocarb(Matrix_56, Matrix_12, age, ageN, iteration_threshold, CO2_out, O2_out, temp_out)
 !  ===============================================================================
 ! | Inputs:
 ! |    Variables:
@@ -22,6 +22,7 @@ subroutine run_geocarb(Matrix_56, Matrix_12, age, ageN, iteration_threshold, CO2
 ! | Outputs:
 ! |     CO2_out	    Modeled CO2 results [ppmv]
 ! |     O2_out	    Modeled O2 results [%]
+! |     temp_out	  Modeled temperature results [deg C relative to present]
 !  =========================================================================
 
 implicit none
@@ -41,6 +42,7 @@ real(DP), dimension(58,ageN), intent(IN) :: Matrix_12 ! 12 time-series parameter
 ! explicit output
 real(DP), dimension(ageN), intent(OUT) :: CO2_out
 real(DP), dimension(ageN), intent(OUT) :: O2_out
+real(DP), dimension(ageN), intent(OUT) :: temp_out
 
 ! local quantities
 integer :: i          ! number of looping for time steps
@@ -549,12 +551,15 @@ Rca = Rca_570
         if (failed_run) then
           !RCO2 = 10.0                                 ! reset RCO2 seed for next run
         end if
+        ! accounting for glacial/non-glacial periods already part of GCM calculation above (with GLAC*)
+        temp_out(i) = GCM*log(RCO2)
 
         ! test for estimated oxygen at present-day to be between 19-23%, and
         ! estimated CO2 at present-day to be between 200-300 ppm; if not, the
         ! whole time-series is considered a failed run
-        if ((t==0.0) .AND. (ISNAN(oxygen+RCO2) .OR. (100.0*(oxygen/(oxygen+143.0)) .lt. 19.0) .OR. &
-                  (100.0*(oxygen/(oxygen+143.0)) .gt. 23.0) .OR. (RCO2 .lt. 0.8) .OR. (RCO2 .gt. 1.2))) then
+        if (((t==0.0) .AND. (ISNAN(oxygen+RCO2) .OR. (100.0*(oxygen/(oxygen+143.0)) .lt. 19.0) .OR. &
+             (100.0*(oxygen/(oxygen+143.0)) .gt. 23.0) .OR. (RCO2 .lt. 0.8) .OR. (RCO2 .gt. 1.2))) .OR. &
+              failed_run) then
           CO2_out(i) = 1.0/0.0
           O2_out(i) = 1.0/0.0
         end if
