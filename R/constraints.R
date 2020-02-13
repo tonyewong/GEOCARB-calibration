@@ -4,7 +4,7 @@
 ## void function. Returns an object `windows` that is ntime x 2, where the two
 ## columns are a lower and upper bound for windows at each time slice. The
 ## precalibration will only permit simulations that pass through all of these
-## windows (or some minimum number of the windows).
+## windows (or some minimum number of the windows). Temperature and CO2.
 ##
 ## Questions? Tony Wong (aewsma@rit.edu)
 ##==============================================================================
@@ -24,54 +24,67 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
-if (TRUE) {
+
+windows <- vector('list', 2)
+names(windows) <- c("co2", "temp")
+for (nn in names(windows)) {
+  windows[[nn]] <- mat.or.vec(n_time, 2)
+  colnames(windows[[nn]]) <- c("low","high")
+}
+nsig <- 1 # number of standard deviations +/- to extend the window
+
+
+##==============================================================================
+## CO2 constraints
+##================
 
 ## for each time period, pool the observations from that 10 Myr slice
 
-nsig <- 1
-windows <- mat.or.vec(n_time, 2)
-colnames(windows) <- c("low","high")
-
 for (tt in 1:n_time) {
     # start each window at 0 to 50000 ppmv range
-    windows[tt,"low"] <- 0
-    windows[tt,"high"] <- 50000
-    idx <- which(time[tt]-data_calib$age < 10 & time[tt]-data_calib$age >= 0)
+    windows$co2[tt,"low"] <- 0
+    windows$co2[tt,"high"] <- 50000
+    idx <- which((data_calib$age < (time[tt]+5)) & (data_calib$age >= (time[tt]-5)))
     if (length(idx) > 0) {
-        sigmas <- log(data_calib$co2_high[idx]/data_calib$co2[idx])
-        centers <- log(data_calib$co2[idx])
+        sigmas <- log10(data_calib$co2_high[idx]/data_calib$co2[idx])
+        centers <- log10(data_calib$co2[idx])
         tops <- centers + nsig*sigmas
         bots <- centers - nsig*sigmas
-        tops_max <- exp(max(tops))
-        bots_min <- exp(min(bots))
-        windows[tt,"low"] <- max(c(bots_min,windows[tt,"low"]))
-        windows[tt,"high"] <- min(c(tops_max,windows[tt,"high"]))
+        tops_max <- 10^(max(tops))
+        bots_min <- 10^(min(bots))
+        windows$co2[tt,"low"] <- max(c(bots_min,windows$co2[tt,"low"]))
+        windows$co2[tt,"high"] <- min(c(tops_max,windows$co2[tt,"high"]))
     }
 }
-# make sure the last window is wider
-windows[58,"low"] <- 180
-windows[58,"high"] <- 400
-
-}
+##==============================================================================
 
 
-if (FALSE) {
+##==============================================================================
+## Temperature constraints
+##========================
 
-ibad <- NULL
-for (ss in 1:n_sample) {
-  if( any(model_out[,ss] < .lower_bound_co2) |
-      any(model_out[,ss] > .upper_bound_co2) |
-      model_out[58,ss] < 180 | model_out[58,ss] > 400) {
-      ##model_out[58,ss] < 280 | model_out[58,ss] > 400) {
-    ibad <- c(ibad,ss)
-  }
-}
+filename.temperature <- "../input_data/Mills_GR_2019_temp_co2.csv"
+data_temps <- read.csv(filename.temperature, col.names=c('time','co2_max','co2_min','T_max','T_min','T_avg'))
 
-n_time <- nrow(model_out)
-parameters_good <- par_calib[-ibad,]
-model_good <- model_out[,-ibad]
-tend <- proc.time()
-}
+# comparisons of temperatures - all relative to "present" (t=0)
+# For the Mills et al, upper and lower are the average +/- 1 sigma.
+# We want nsig (from `constraints.R`), so take as bounds:
+#    upper |--> average + nsig*(upper - average)
+#    lower |--> average - nsig*(average - lower)
+
+temp_upper <- data_temps[,"T_avg"] + nsig*(data_temps[,"T_max"]-data_temps[,"T_avg"])
+temp_lower <- data_temps[,"T_avg"] - nsig*(data_temps[,"T_avg"]-data_temps[,"T_min"])
+
+# normalize relative to "present"
+subtract <- data_temps[1,"T_avg"]
+temp_upper <- temp_upper - subtract
+temp_lower <- temp_lower - subtract
+
+windows_temp <- cbind(temp_lower, temp_upper)
+idx_temp <- match(-age, data_temps[,"time"])
+windows_temp <- windows_temp[idx_temp,]
+windows$temp[,c("low","high")] <- windows_temp
+##==============================================================================
 
 
 ##==============================================================================

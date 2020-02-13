@@ -22,6 +22,7 @@
 ##==============================================================================
 
 install.packages('adaptMCMC')
+install.packages("CholWishart")
 install.packages('ncdf4')
 install.packages('sn')
 install.packages('invgamma')
@@ -35,3 +36,6 @@ install.packages('foreach')
 install.packages('doParallel')
 install.packages('coda')
 install.packages('manipulate')
+install.packages("float")
+install.packages("abind")
+install.packages('MASS')

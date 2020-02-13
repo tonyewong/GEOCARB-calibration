@@ -65,7 +65,7 @@ if (substr(param_choice,1,6)=="PR2011") {
 # Now, set up the parameters as desired. Possibly the same.
 filename.calibinput <- paste('../input_data/GEOCARB_input_summaries_calib_',param_choice,'.csv', sep='')
 source('parameterSetup_tvq.R')
-source('model_forMCMC_tvq.R')
+source('model_forMCMC.R')
 source('run_geocarbF.R')
 ##==============================================================================
 

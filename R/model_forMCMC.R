@@ -4,6 +4,7 @@
 ## Input:
 ##  par_calib        vector of input parameters. first N_const_calib are the
 ##                   time-constant parameters. next ageN are the first
+##  par_time         3-dimensional array of the
 ##  par_fixed        vector structured like par_calib, but for fixed arrays
 ##                   (not calibrated)
 ##  age              age, in millions of years
@@ -17,10 +18,6 @@
 ##  parnames_calib   calibration parameter names
 ##  parnames_fixed   fixed parameter names
 ##  parnames_time    time-varying parameter names
-##  do_sample_tvq    (logical) turn CDF samples from par_calib into time-varying
-##                   parameter arrays?
-##  par_time_center  centers of the time varying parameter arrays
-##  par_time_stdev   standard deviations of the time varying parameter arrays
 ##
 ## Output:
 ##  age              age, in millinos of years
@@ -46,12 +43,12 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
-model_forMCMC <- function(par_calib, par_fixed, parnames_calib, parnames_fixed, parnames_time,
-                          age, ageN, ind_const_calib, ind_time_calib,
+model_forMCMC <- function(par_calib, par_time, par_fixed, parnames_calib,
+                          parnames_fixed, parnames_time, age, ageN,
+                          ind_const_calib, ind_time_calib,
                           ind_const_fixed, ind_time_fixed,
                           ind_expected_time, ind_expected_const,
-                          iteration_threshold,
-                          do_sample_tvq, par_time_center, par_time_stdev) {
+                          iteration_threshold) {
 
   # this takes in two parameter arrays: one that is all of the parameters
   # actually being calibrated, and the other that is the fixed (non-calib)
@@ -67,6 +64,7 @@ model_forMCMC <- function(par_calib, par_fixed, parnames_calib, parnames_fixed, 
   rownames(Matrix_56_unordered) <- c( parnames_calib[ind_const_calib],
                                       parnames_fixed[ind_const_fixed] )
 
+if(FALSE) {
   # set up the time-varying parameter matrices
   # rows = time, col = different time series
 
@@ -82,6 +80,8 @@ model_forMCMC <- function(par_calib, par_fixed, parnames_calib, parnames_fixed, 
       Matrix_12_unordered[,ts] <- qnorm(p=cdf_val, mean=par_time_center[[ts]], sd=par_time_stdev[[ts]])
     }
   }
+}
+  Matrix_12_unordered <- par_time
 
   geoRes <- run_geocarbF(Matrix_56=Matrix_56_unordered,
                          Matrix_12=Matrix_12_unordered,

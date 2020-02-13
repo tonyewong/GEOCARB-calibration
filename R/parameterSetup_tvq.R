@@ -193,6 +193,7 @@ time_names_expected <- c('Sr',     #(:,1)
                          'RT',     #(:,10)
                          'fSR',    #(:,11)
                          'fC')     #(:,12)
+n_parameters_time <- length(time_names_expected)
 
 # how do we rearrange Matrix_56 to feed into run_geocarb.f90 as it expects?
 const_names_in <- c( parnames_calib[ind_const_calib],
