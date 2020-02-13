@@ -2,9 +2,8 @@
 ## model_forMCMC_tvq.R
 ##
 ## Input:
-##  par_calib        vector of input parameters. first N_const_calib are the
-##                   time-constant parameters. next ageN are the first
-##  par_time         3-dimensional array of the
+##  par_calib        vector of scalar input parameters
+##  par_time         array of time-varying parameters
 ##  par_fixed        vector structured like par_calib, but for fixed arrays
 ##                   (not calibrated)
 ##  age              age, in millions of years
@@ -27,7 +26,7 @@
 ##
 ## Questions? Tony Wong (aewsma@rit.edu)
 ##==============================================================================
-## Copyright 2019 Tony Wong
+## Copyright 2020 Tony Wong
 ## This file is part of GEOCARB-calibration.
 ## GEOCARB-calibration is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -50,37 +49,24 @@ model_forMCMC <- function(par_calib, par_time, par_fixed, parnames_calib,
                           ind_expected_time, ind_expected_const,
                           iteration_threshold) {
 
-  # this takes in two parameter arrays: one that is all of the parameters
-  # actually being calibrated, and the other that is the fixed (non-calib)
-  # parameters. here, we paste the two of them together for input to the model.
+  # here, we are assuming that we will calibrate all of the parameters
+  # par_calib = a vector of all of the constant parameters
+  # par_time = a matrix of all of the time-varying parameters
+  # par_fixed will be NULL in this case
+  # parnames_calib = names of all of the constant parameters
+  # parnames_time = names of all of the time-varying parameters
 
   N_const_total <- length(c(ind_const_calib, ind_const_fixed))
   N_time_total <- length(c(ind_time_calib, ind_time_fixed))#/ageN
 
-  # set up the time-constant parameter matrices
+  # set up the time-constant parameter matrix (vector, only 1 simulation set)
   # first length(ind_const_calib) values are the calibration parameters
   # then the fixed values come at the end
   Matrix_56_unordered <- matrix(c(par_calib[ind_const_calib], par_fixed[ind_const_fixed]), nrow=N_const_total, ncol=1)
   rownames(Matrix_56_unordered) <- c( parnames_calib[ind_const_calib],
                                       parnames_fixed[ind_const_fixed] )
 
-if(FALSE) {
-  # set up the time-varying parameter matrices
-  # rows = time, col = different time series
-
-  # HERE is where mapping from CDF probabilities to quantiles should occur
-
-  # initailize -- this puts it in the proper order already
-  Matrix_12_unordered <- as.matrix(par_time_center)
-
-  # sampling
-  if(do_sample_tvq) {
-    for (ts in intersect(parnames_time, parnames_calib)) {
-      cdf_val <- par_calib[match(ts, parnames_calib)]
-      Matrix_12_unordered[,ts] <- qnorm(p=cdf_val, mean=par_time_center[[ts]], sd=par_time_stdev[[ts]])
-    }
-  }
-}
+  # set up the time-varying parameter matrix
   Matrix_12_unordered <- par_time
 
   geoRes <- run_geocarbF(Matrix_56=Matrix_56_unordered,
@@ -100,30 +86,3 @@ if(FALSE) {
 ##==============================================================================
 ## End
 ##==============================================================================
-
-if(FALSE) { # don't want to write any output - just return the GEOCARB_output
-# to the MCMC
-#	write.csv(GEOCARB_output, "GEOCARB_output.csv")
-
-  #####In order to run Yawen's MCMC code "cali_1D_YC.R", I need to first
-  #####interpolate the model years such that it has the same output as the data
-  #1) read in the output of GEOCARB model
-  output <- read.csv("GEOCARB_output.csv")
-  #2) Interpolate the model output
-  baseline <- read.csv("PhanCO2_input.csv")
-  fun <- approxfun(output[,2], output[,4])
-  output.approx <- fun(baseline[,3])
-  #model.year <- output[,2]
-  #index=which (model.year == baseline[,1])
-  GEOCARB_output_interp <- matrix(0, nrow=944, ncol=2)
-  GEOCARB_output_interp[,1] <- baseline[,3]
-  GEOCARB_output_interp[,2] <- output.approx
-  write.csv(GEOCARB_output_interp, "GEOCARB_output_interp.csv")
-  return(list(y=GEOCARB_output_interp))
-}
-
-
-#CO2 <- read.csv("GEOCARB_output_original.csv")
-#age_geocarb <- CO2[,1]
-#co2 <- CO2[,4]
-#plot(age_geocarb,co2,type='l')

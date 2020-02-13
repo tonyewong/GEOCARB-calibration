@@ -64,7 +64,7 @@ if (substr(param_choice,1,6)=="PR2011") {
 
 # Now, set up the parameters as desired. Possibly the same.
 filename.calibinput <- paste('../input_data/GEOCARB_input_summaries_calib_',param_choice,'.csv', sep='')
-source('parameterSetup_tvq.R')
+source('parameterSetup.R')
 source('model_forMCMC.R')
 source('run_geocarbF.R')
 ##==============================================================================
@@ -84,26 +84,27 @@ source("getData.R")
 ##==========================================
 
 # Get model parameter prior distributions
-names <- as.character(input$parameter)
+names <- as.character(input$parameter[ind_const])
 bound_lower <- rep(NA, length(names))
 bound_upper <- rep(NA, length(names))
 
-ind_neg_inf <- which(input[,'lower_limit']=='_inf')
+ind_neg_inf <- which(input[ind_const,'lower_limit']=='_inf')
 bound_lower[ind_neg_inf] <- -Inf
-bound_lower[setdiff(1:length(names), ind_neg_inf)] <- as.numeric(as.character(input$lower_limit[setdiff(1:length(names), ind_neg_inf)]))
-bound_upper <- input$upper_limit
+bounds_in <- input$lower_limit[ind_const]
+bound_lower[setdiff(1:length(names), ind_neg_inf)] <- as.numeric(as.character(bounds_in[setdiff(1:length(names), ind_neg_inf)]))
+bound_upper <- input$upper_limit[ind_const]
 
 bounds <- cbind(bound_lower, bound_upper)
-rownames(bounds) <- as.character(input$parameter)
+rownames(bounds) <- as.character(input$parameter[ind_const])
 
 # only actually need the calibration parameters' bounds, so reformat the bounds
 # array to match the vector of calibration parameters
-bounds_calib <- mat.or.vec(nr=length(parnames_calib), nc=2)
+bounds_calib <- mat.or.vec(nr=length(parnames_const_calib), nc=2)
 colnames(bounds_calib) <- c('lower','upper')
-rownames(bounds_calib) <- parnames_calib
-for (i in 1:length(parnames_calib)) {
-  bounds_calib[i,'lower'] <- bounds[parnames_calib[i],'bound_lower']
-  bounds_calib[i,'upper'] <- bounds[parnames_calib[i],'bound_upper']
+rownames(bounds_calib) <- parnames_const_calib
+for (i in 1:length(parnames_const_calib)) {
+  bounds_calib[i,'lower'] <- bounds[parnames_const_calib[i],'bound_lower']
+  bounds_calib[i,'upper'] <- bounds[parnames_const_calib[i],'bound_upper']
 }
 
 rm(list=c('bound_lower','bound_upper','bounds'))

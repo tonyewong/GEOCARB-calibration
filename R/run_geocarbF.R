@@ -23,7 +23,7 @@
 ##
 ## Questions? Tony Wong (aewsma@rit.edu)
 ##==============================================================================
-## Copyright 2019 Tony Wong
+## Copyright 2020 Tony Wong
 ## This file is part of GEOCARB-calibration.
 ## GEOCARB-calibration is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ run_geocarbF <- function(Matrix_56,
 
   # reorganzie Matrix_56 (56x1 vector) and Matrix_12 (ageNx12 time series) into
   # the orders that run_geocarb.f90 expects
-  Matrix_12_ordered <- Matrix_12[,ind_expected_time]
+  Matrix_12_ordered <- as.matrix(Matrix_12[,ind_expected_time])
   Matrix_56_ordered <- Matrix_56[ind_expected_const,]
 
   # fortran version

@@ -8,7 +8,7 @@
 ##
 ## Questions? Tony Wong (aewsma@rit.edu)
 ##==============================================================================
-## Copyright 2019 Tony Wong
+## Copyright 2020 Tony Wong
 ## This file is part of GEOCARB-calibration.
 ## GEOCARB-calibration is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -33,8 +33,6 @@ for (i in 1:n_data_sets) {
   ind_assim[[i]] <- which(as.character(data_calib_all$proxy_type) == data_to_assim[1,ind_data[i]])
 }
 data_calib <- data_calib_all[unlist(ind_assim),]
-
-# TODO -- here bin the data centered at 10Myr slots
 
 # assumption of steady state in-between model time steps permits figuring out
 # which model time steps each data point should be compared against in advance.
