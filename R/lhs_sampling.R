@@ -127,9 +127,17 @@ print("here for some reason?")
 
     # combine the good ones with previous good estimates
     idx_save <- which((prcout_co2 <= prcout_threshold) & (prcout_temp <= prcout_threshold))
-    par_calib_save <- rbind(par_calib_save, par_calib[[cc]][idx_save,])
-    par_time_save <- abind(par_time_save, time_series_samples[,idx_save,], along=2)
-    par_covar_save <- abind(par_covar_save, covariance_samples[,,idx_save,], along=3)
+    if( (length(idx_save)+nrow(par_calib_save)) >= n_sample_min) {
+      idx_save <- idx_save[1:(n_sample_min-nrow(par_calib_save))]
+      par_calib_save <- rbind(par_calib_save, par_calib[[cc]][idx_save,])
+      par_time_save <- abind(par_time_save, time_series_samples[,idx_save,], along=2)
+      par_covar_save <- abind(par_covar_save, covariance_samples[,,idx_save,], along=3)
+      break
+    } else {
+      par_calib_save <- rbind(par_calib_save, par_calib[[cc]][idx_save,])
+      par_time_save <- abind(par_time_save, time_series_samples[,idx_save,], along=2)
+      par_covar_save <- abind(par_covar_save, covariance_samples[,,idx_save,], along=3)
+    }
   }
 }
 tend <- proc.time()

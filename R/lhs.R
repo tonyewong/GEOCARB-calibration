@@ -35,22 +35,23 @@ library(MASS)
 
 ## Set testing number of samples and file name appendix here
 ## if there aren't enough samples on the MCMC output file, will break.
-n_sample <- 12000
-n_sample_per_chunk <- 5000 # maximum number of time series samples to consider at once
+n_sample <- 500000
+n_sample_per_chunk <- 15000 # maximum number of time series samples to consider at once
+n_sample_min <- 40000 # minimum number of samples we'd be happy with; stop after this to avoid overrunning RAM
 n_node <- 1 # distribute the chunks across multiple nodes?
-
-appen <- 'test'
 
 param_choice <- 'all'   # Calibrate all 68 parameters? ("all") or only the 6 from Park and Royer 2011 ("PR2011")
 data_choice <- 'F2017'    # Which data set?  PR2011 = Park and Royer (2011), or F2017 = Foster et al (2017)
 fSR_choice <- 'DT2019'     # Which fSR time series? ("PR2011", "LENTON", "DT2019")
 plot.dir <- '../figures/'
-prcout_threshold <- 0.5  # only save simulations with percent_outbound < this
+prcout_threshold <- 0.4  # only save simulations with percent_outbound < this
 
 # calibration parameters and input data
 filename.data <- '../input_data/CO2_Proxy_Foster2017_calib_SN-co2_25Sep2018.csv'
 filename.calibinput <- '../input_data/GEOCARB_input_summaries_calib_all.csv'
-
+filename.covarout <- paste('../output/lhs_covar_out',prcout_threshold*100,'.RData',sep='')
+filename.paramout <- paste('../output/lhs_param_out',prcout_threshold*100,'.RData',sep='')
+                      
 if(Sys.info()['user']=='tony') {
   # Tony's local machine (if you aren't me, you almost certainly need to change this...)
   machine <- 'local'
@@ -107,7 +108,8 @@ source("lhs_sampling.R")
 ## Save
 ##========================
 
-save(list=c("par_calib_save","par_time_save","par_covar_save"), file="lhs_precalibration.RData")
+save(list=c("par_covar_save"), file=filename.covarout)
+save(list=c("par_calib_save","par_time_save"), file=filename.paramout)
 
 ##==============================================================================
 
