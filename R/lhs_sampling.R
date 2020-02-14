@@ -25,6 +25,7 @@
 # their covariance
 source("time_series_df.R")
 
+tbeg <- proc.time()
 if (n_sample <= n_sample_per_chunk) {
   # business as usual
 
@@ -99,7 +100,6 @@ print("here for some reason?")
     # run the simulations
     model_co2_this_chunk <- model_temp_this_chunk <- mat.or.vec(nr=n_time, nc=n_sample_this_chunk[cc])
     prcout_co2 <- prcout_temp <- rep(NA, n_sample_this_chunk[cc])
-    tbeg <- proc.time()
     for (ii in 1:n_sample_this_chunk[cc]) {
       model_out <- model_forMCMC(par_calib=par_calib[[cc]][ii,],
                                  par_time=time_series_samples[,ii,],
