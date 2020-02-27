@@ -125,8 +125,24 @@ print("here for some reason?")
       prcout_temp[ii] <- percout(model_temp_this_chunk[,ii], windows$temp)
     }
 
+    # do the following for CO2-only, temperature-only, and CO2+temperature
+
     # combine the good ones with previous good estimates
-    idx_save <- which((prcout_co2 <= prcout_threshold) & (prcout_temp <= prcout_threshold))
+    idx_save_temp <- which(prcout_temp <= prcout_threshold)
+    idx_save_co2 <- which(prcout_co2 <= prcout_threshold)
+    idx_save_both <- intersect(idx_save_temp, idx_save_co2)
+
+    # pick which to use based on which data sets
+    if (use_temperature & use_co2) {
+      idx_save <- idx_save_both
+    } else if (use_temperature & !use_co2) {
+      idx_save <- idx_save_temp
+    } else if (!use_temperature & use_co2) {
+      idx_save <- idx_save_co2
+    } else {
+      print("ERROR: need to use at least one of temperature and/or CO2 data")
+    }
+
     if( (length(idx_save)+max(nrow(par_calib_save),0)) >= n_sample_min) {
       idx_save <- idx_save[1:(n_sample_min-nrow(par_calib_save))]
       par_calib_save <- rbind(par_calib_save, par_calib[[cc]][idx_save,])
