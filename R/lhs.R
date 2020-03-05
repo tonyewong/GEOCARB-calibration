@@ -21,7 +21,6 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
-if(FALSE) {
 ## Clear workspace
 rm(list=ls())
 
@@ -49,7 +48,7 @@ plot.dir <- '../figures/'
 prcout_threshold <- 0.5  # only save simulations with percent_outbound < this
 use_temperature <- TRUE
 use_co2 <- FALSE
-}
+
 
 # calibration parameters and input data
 filename.data <- '../input_data/CO2_Proxy_Foster2017_calib_SN-co2_25Sep2018.csv'
