@@ -21,35 +21,6 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
-## Clear workspace
-rm(list=ls())
-
-# needed packages
-library(foreach)
-library(doParallel)
-library(lhs)
-library(Hmisc)
-library(CholWishart)
-library(abind)
-library(MASS)
-
-## Set testing number of samples and file name appendix here
-## if there aren't enough samples on the MCMC output file, will break.
-n_sample <- 1000000
-n_sample_per_chunk <- 10000 # maximum number of time series samples to consider at once
-n_sample_min <- 40000 # minimum number of samples we'd be happy with; stop after this to avoid overrunning RAM
-                      # if you don't want to use this, just set it greater than n_sample
-n_node <- 1 # distribute the chunks across multiple nodes?
-
-param_choice <- 'all'   # Calibrate all 68 parameters? ("all") or only the 6 from Park and Royer 2011 ("PR2011")
-data_choice <- 'F2017'    # Which data set?  PR2011 = Park and Royer (2011), or F2017 = Foster et al (2017)
-fSR_choice <- 'DT2019'     # Which fSR time series? ("PR2011", "LENTON", "DT2019")
-plot.dir <- '../figures/'
-prcout_threshold <- 0.5  # only save simulations with percent_outbound < this
-use_temperature <- TRUE
-use_co2 <- FALSE
-
-
 # calibration parameters and input data
 filename.data <- '../input_data/CO2_Proxy_Foster2017_calib_SN-co2_25Sep2018.csv'
 filename.calibinput <- '../input_data/GEOCARB_input_summaries_calib_all.csv'

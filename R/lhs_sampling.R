@@ -127,7 +127,7 @@ print("here for some reason?")
 
     # do the following for CO2-only, temperature-only, and CO2+temperature
 
-    # combine the good ones with previous good estimates
+    # combine the good ones with previous good estimates - and remove any runs with inf time steps
     idx_save_temp <- which(prcout_temp <= prcout_threshold)
     idx_save_co2 <- which(prcout_co2 <= prcout_threshold)
     idx_save_both <- intersect(idx_save_temp, idx_save_co2)
