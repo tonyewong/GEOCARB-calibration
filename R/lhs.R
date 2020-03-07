@@ -32,19 +32,6 @@ if (use_temperature) {data_appen <- paste(data_appen,"t",sep="")}
 filename.covarout <- paste('../output/lhs_covar_',data_appen,'_out',prcout_threshold*100,'.RData',sep='')
 filename.paramout <- paste('../output/lhs_param_',data_appen,'_out',prcout_threshold*100,'.RData',sep='')
 
-if(Sys.info()['user']=='tony') {
-  # Tony's local machine (if you aren't me, you almost certainly need to change this...)
-  machine <- 'local'
-  setwd('/Users/tony/codes/GEOCARB-calibration/R')
-} else if(Sys.info()['user']=='aewsma') {
-  machine <- 'office'
-  setwd('/Users/aewsma/codes/GEOCARB-calibration/R')
-} else {
-  # assume on another cluster of some kind...
-  machine <- 'remote'
-  setwd('~/work/codes/GEOCARB-calibration/R')
-}
-
 source("model_setup.R")
 n_parameters <- length(parnames_const_calib)
 n_parameters_time <- length(parnames_time_calib)

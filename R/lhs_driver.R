@@ -39,6 +39,19 @@ library(CholWishart)
 library(abind)
 library(MASS)
 
+if(Sys.info()['user']=='tony') {
+  # Tony's local machine (if you aren't me, you almost certainly need to change this...)
+  machine <- 'local'
+  setwd('/Users/tony/codes/GEOCARB-calibration/R')
+} else if(Sys.info()['user']=='aewsma') {
+  machine <- 'office'
+  setwd('/Users/aewsma/codes/GEOCARB-calibration/R')
+} else {
+  # assume on another cluster of some kind...
+  machine <- 'remote'
+  setwd('~/work/codes/GEOCARB-calibration/R')
+}
+
 ## Set testing number of samples and file name appendix here
 ## if there aren't enough samples on the MCMC output file, will break.
 n_sample <- 20000000
