@@ -552,7 +552,8 @@ Rca = Rca_570
           !RCO2 = 10.0                                 ! reset RCO2 seed for next run
         end if
         ! accounting for glacial/non-glacial periods already part of GCM calculation above (with GLAC*)
-        temp_out(i) = GCM*log(RCO2)
+        !temp_out(i) = GCM*log(RCO2)
+        temp_out(i) = GCM*log(RCO2) - Ws*t/570
 
         ! test for estimated oxygen at present-day to be between 19-23%, and
         ! estimated CO2 at present-day to be between 200-300 ppm; if not, the
