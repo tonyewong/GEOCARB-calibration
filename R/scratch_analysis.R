@@ -150,8 +150,6 @@ model_quantiles[[bb]][[dd]][[oo]][tt,] <- quantile(model_hindcast[[bb]][[dd]][[o
 
 ## make a preliminary plot of the hindcasts relative to proxy data
 
-todo
-
 source("getData.R")
 source("constraints.R")
 
@@ -186,6 +184,7 @@ polygon(-c(time,rev(time)), c(windows$temp[,"high"],rev(windows$temp[,"low"])), 
 lines(-time, model_quantiles$`50`$ct$temp[,"0.5"], lwd=1, lty=5, col=rgb(.6,.2,.6))
 mtext('Time [Myr ago]', side=1, line=2.1)
 mtext('Global average surface\n temperature [deg C]', side=2, line=2.2)
+#mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3) # <<<<<<<<<<<<<<<<<<<<<<<< FIGURE OUT DEGREE SYMBOL?
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
@@ -197,10 +196,155 @@ legend(-452, 50, c('This work','Mills et al [2019]'), pch=c('-',''), col=c(rgb(.
 
 
 
-
 ## compute uncertainty ranges for ESS for each experiment
 
 todo
+
+# show prior, this work
+# show "posterior", this work
+# show "posterior", Park and Royer (2011)
+
+
+par_quantiles$`35`$ct["deltaT2Xglac",]
+
+
+
+# density estimates for the distributions of deltaT2X
+
+# experiment you want
+bb <- "30"
+dd <- "ct"
+
+# density of deltaT2X from this work
+parnames_calib <- colnames(par_calib[[bb]][[dd]])
+ics <- match('deltaT2X', parnames_calib)
+deltaT2X_density <- density(par_calib[[bb]][[dd]][,ics], from=0, to=10)
+
+iglac <- match('GLAC', parnames_calib)
+glac_density <- density(par_calib[[bb]][[dd]][,iglac], from=1, to=5)
+
+icsg <- match('deltaT2Xglac', parnames_calib)
+deltaT2Xglac_density <- density(par_calib[[bb]][[dd]][,icsg], from=0, to=25)
+
+
+pr2011_dat <- read.csv('../input_data/ParkRoyer2011_Fig3_85varred.csv')
+pr2011_cdf <- approxfun(pr2011_dat[,1], pr2011_dat[,4])
+pr2011_icdf <- approxfun(pr2011_dat[,4], pr2011_dat[,1])
+pr2011_pdf <- approxfun(pr2011_dat[,1], pr2011_dat[,3])
+
+deltaT2X_density_pr2011 <- vector('list', 2); names(deltaT2X_density_pr2011) <- c('x','y')
+deltaT2X_density_pr2011$x <- deltaT2X_density$x
+deltaT2X_density_pr2011$y <- pr2011_pdf(deltaT2X_density_pr2011$x)
+
+# Park and Royer 2011 have about 16% probability above deltaT2X = 6 deg C
+print(1-pr2011_cdf(6))
+print(1-pr2011_cdf(7))
+
+# get priors too
+row_num <- match('deltaT2X',input$parameter)
+x_cs <- seq(from=0, to=10, by=0.1)
+f_cs <- dlnorm(x=x_cs, meanlog=log(input[row_num,"mean"]), sdlog=log(0.5*input[row_num,"two_sigma"]))
+row_num <- match('GLAC',input$parameter)
+x_gl <- seq(from=0, to=10, by=0.1)
+f_gl <- dnorm(x=x_gl, mean=input[row_num,"mean"], sd=(0.5*input[row_num,"two_sigma"]))
+
+# Royer et al 2007:  1.5 and 6.2 deg C (5–95% range), 2.8 best fit
+x_5_95_royer2007 <- c(1.6, 2.8, 5.5)
+# Park and Royer 2011 from CSV/Excel table
+x_5_95_pr2011 <- pr2011_icdf(c(.05,.5,.95))
+x_5_95_thisstudy <- quantile(par_calib[[bb]][[dd]][,ics], c(.05,.5,.95))  #
+x_5_95_glac <- quantile(par_calib[[bb]][[dd]][,ics]*par_calib[[bb]][[dd]][,iglac], c(.05,.5,.95))  #
+x_ktc2017 <- c(3.7, 5.6, 7.5)
+
+
+## figure comparing the 30%-outbound ct experiment
+
+library(Hmisc)
+
+offset <- 0.1
+
+#pdf(paste(plot.dir,'deltaT2X.pdf',sep=''),width=4,height=3, colormodel='cmyk', pointsize=11)
+#par(mfrow=c(1,1), mai=c(.7,.3,.13,.15))
+plot(deltaT2X_density$x, deltaT2X_density$y + offset, type='l', lwd=1.7, xlim=c(0.9,10.1), ylim=c(0,.9+offset),
+     xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n', axes=FALSE, col="steelblue")
+#polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]][,'q025'],rev(model_quantiles[,'q975'])), col='aquamarine1', border=NA)
+#polygon(-c(time,rev(time)), c(model_quantiles[,'q05'],rev(model_quantiles[,'q95'])), col='aquamarine3', border=NA)
+#lines(deltaT2X_density_nm$x, deltaT2X_density_nm$y + offset, lwd=2, lty=3)
+lines(deltaT2X_density_pr2011$x, deltaT2X_density_pr2011$y + offset, lwd=1.7, lty=2)
+lines(x_cs, f_cs + offset, lwd=1.7, lty=3, col="steelblue")
+mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+mtext('Density', side=2, line=0.3)
+arrows(1, 0, 1, .85+offset, length=0.08, angle=30, code=2)
+axis(1, at=seq(0,10))
+minor.tick(nx=4, ny=0, tick.ratio=0.5)
+y0 <- 0.7*offset; arrows(x_5_95_thisstudy[1], y0, x_5_95_thisstudy[3], y0, lwd=1.5, length=0.04, angle=90, code=3, col="steelblue"); points(x_5_95_thisstudy[2], y0, pch=16, col="steelblue")
+#y1 <- 0.35*offset; arrows(x_5_95_royer2007[1], y1, x_5_95_royer2007[3], y1, lwd=1.5, length=0.04, angle=90, code=3); points(x_5_95_royer2007[2], y1, pch=15)
+y1 <- 0.3*offset; arrows(x_5_95_pr2011[1], y1, x_5_95_pr2011[3], y1, lwd=1.5, length=0.04, angle=90, code=3); points(x_5_95_pr2011[2], y1, pch=15)
+#y2 <- 0.08; arrows(x_5_95_ktc2017[1], y2, x_5_95_ktc2017[3], y2, length=0.04, angle=90, code=3); points(x_5_95_ktc2017[2], y2, pch=17)
+legend(5.1,1.02, c('5-95% range, PR2011','PR2011','5-95% range, this study','Posterior, this study','Prior, both studies'),
+       pch=c(15,NA,16,NA,NA), lty=c(1,2,1,1,3), col=c("black","black","steelblue","steelblue","steelblue"), bty='n', lwd=1.7, cex=0.9)
+#dev.off()
+
+
+## figure comparing the quantiles across the different experiments
+
+y0 <- 0
+ylims <- c(0,10)
+width <- 0.5
+offset <- 0.15
+colors <- vector("list", 3); names(colors) <- data_sets
+alphas <- c(0.45, 0.65)
+colors$c <- c(rgb(0,0,0.5,alphas[1]), rgb(0,0,0.9,alphas[2]))
+colors$t <- c(rgb(0.5,0,0,alphas[1]), rgb(0.8,0,0,alphas[2]))
+colors$ct <- c(rgb(0.5,0,0.5,alphas[1]), rgb(0.85,0,0.85,alphas[2]))
+
+bb <- "30"
+plot(-10,-10, xlim=c(1.5,5.5), ylim=c(0+0.5*offset,10+0.5*offset), yaxt='n', ylab='', xlab='')
+for (xx in seq(0,10)) {lines(rep(xx,2), 2*ylims, col=rgb(.65,.65,.65,1), lty=3, lwd=0.5)}
+for (dd in data_sets) {
+    for (bb in prc_outbound) {
+        tmp <- par_quantiles[[bb]][[dd]]["deltaT2X",c("0.25","0.75","0.05","0.95","0.5")]
+        polygon(c(tmp[3:4], rev(tmp[3:4])), c(rep(y0,2),rep(y0+width,2)), lwd=1, col=colors[[dd]][1])
+        polygon(c(tmp[1:2], rev(tmp[1:2])), c(rep(y0,2),rep(y0+width,2)), lwd=1, col=colors[[dd]][2])
+        lines(c(tmp[5],tmp[5]), c(y0,y0+width), type='l', lwd=2)
+        y0 <- y0+width+offset
+    }
+    y0 <- y0+2*offset
+}
+mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+minor.tick(ny=0)
+mtext(expression('CO'[2]), side=2, line=.3, adj=0.12)
+mtext("T", side=2, line=.3, adj=0.5)
+mtext(expression("CO"[2]*" & T"), side=2, line=.3, adj=1.0)
+
+
+
+## figure comparing the quantiles as sample size increases
+
+y0 <- 0
+ylims <- c(0,8.5)
+width <- 0.7
+offset <- 0.2
+alphas <- c(0.45, 0.65)
+
+bb <- "30"
+dd <- "ct"
+plot(-10,-10, xlim=c(1.5,5.5), ylim=c(ylims[1]+1.0*offset,ylims[2]+0.5*offset), yaxt='n', ylab='', xlab='')
+for (xx in seq(0,10)) {lines(rep(xx,2), 2*ylims, col=rgb(.65,.65,.65,1), lty=3, lwd=0.5)}
+nn_test <- seq(1000,10000,1000)
+for (nn in nn_test) {
+    tmp_sample <- par_calib[[bb]][[dd]][1:nn,"deltaT2X"]
+    tmp <- quantile(tmp_sample, c(0.25,0.75,0.05,0.95,0.5))
+    polygon(c(tmp[3:4], rev(tmp[3:4])), c(rep(y0,2),rep(y0+width,2)), lwd=1, col=rgb(.5,.5,.5,alphas[1]))
+    polygon(c(tmp[1:2], rev(tmp[1:2])), c(rep(y0,2),rep(y0+width,2)), lwd=1, col=rgb(.5,.5,.5,alphas[2]))
+    lines(c(tmp[5],tmp[5]), c(y0,y0+width), type='l', lwd=2)
+    text(4.7, y0+0.5*width, nn)
+    y0 <- y0+width+offset
+}
+mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+minor.tick(ny=0)
+
+
 
 
 
