@@ -116,7 +116,8 @@ for (bb in prc_outbound) {
                                        ind_expected_const=ind_expected_const,
                                        iteration_threshold=iteration_threshold)
             model_hindcast[[bb]][[dd]]$co2[,ii] <- model_out[,"co2"]
-            model_hindcast[[bb]][[dd]]$temp[,ii] <- model_out[,"temp"] + 15 # as in Berner 2004
+            model_hindcast[[bb]][[dd]]$temp[,ii] <- model_out[,"temp"] + par_calib[[bb]][[dd]][ii,"Ws"]*model_out[,1]/570 + 15 # as in Berner 2004
+            # ^-- adding the Ws*t/570 solar luminosity contribution back in, so we have actual temperatures
         }
     }
 }
@@ -152,20 +153,22 @@ model_quantiles[[bb]][[dd]][[oo]][tt,] <- quantile(model_hindcast[[bb]][[dd]][[o
 
 source("getData.R")
 source("constraints.R")
+windows$temp_sol <- windows$temp + array(rep(7.4*time/570,2), dim=c(58,2))
 
 # pick which simulation set to display
-bb <- "30"
+bb <- "50"
 dd <- "ct"
 
 #pdf(paste(plot.dir,'model_ensemble_vs_obspts_logscale_2errbars+Royer14.pdf',sep=''),width=4,height=3,colormodel='cmyk', pointsize=11)
 
 par(mfrow=c(2,1), mai=c(1,1,.15,.15))
-plot(-time, log10(model_quantiles$`50`$ct$co2[,"0.5"]), type='l', xlim=c(-450,0), ylim=c(0,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
-polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.025"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.975"]))), col=rgb(.6,.2,.6,.25), border=NA)
-polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.05"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.95"]))), col=rgb(.6,.2,.6,.45), border=NA)
-polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.25"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.75"]))), col=rgb(.6,.2,.6,.65), border=NA)
+plot(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), type='l', xlim=c(-450,0), ylim=c(0,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+grid()
+polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.025"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.975"]))), col=rgb(0,0,.6,.25), border=NA)
+polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.05"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.95"]))), col=rgb(0,0,.6,.45), border=NA)
+polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.25"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.75"]))), col=rgb(0,0,.6,.65), border=NA)
 polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
-lines(-time, log10(model_quantiles$`50`$ct$co2[,"0.5"]), lwd=1, lty=5, col=rgb(.6,.2,.6))
+lines(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,0,.6))
 mtext('Time [Myr ago]', side=1, line=2.1)
 mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.2)
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
@@ -173,24 +176,25 @@ ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
-legend(-452, log10(7), c('This work','Foster et al [2017]'), pch=c(15,15), col=c(rgb(.6,.2,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
-legend(-452, log10(7), c('This work','Foster et al [2017]'), pch=c('-',''), col=c(rgb(.6,.2,.6,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+legend(-452, log10(7), c('This work','Foster et al [2017]'), pch=c(15,15), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
+legend(-452, log10(7), c('This work','Foster et al [2017]'), pch=c('-',''), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
 
-plot(-time, model_quantiles$`50`$ct$temp[,"0.5"], type='l', xlim=c(-450,0), ylim=c(0,50), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
-polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.025"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.975"])), col=rgb(.6,.2,.6,.25), border=NA)
-polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.05"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.95"])), col=rgb(.6,.2,.6,.45), border=NA)
-polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.25"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.75"])), col=rgb(.6,.2,.6,.65), border=NA)
-polygon(-c(time,rev(time)), c(windows$temp[,"high"],rev(windows$temp[,"low"])), col=rgb(.5,.5,.5,.5), border=NA)
-lines(-time, model_quantiles$`50`$ct$temp[,"0.5"], lwd=1, lty=5, col=rgb(.6,.2,.6))
+plot(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], type='l', xlim=c(-450,0), ylim=c(0,50), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+grid()
+polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.025"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
+polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.05"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
+polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.25"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
+polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=NA)
+lines(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
 mtext('Time [Myr ago]', side=1, line=2.1)
-mtext('Global average surface\n temperature [deg C]', side=2, line=2.2)
-#mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3) # <<<<<<<<<<<<<<<<<<<<<<<< FIGURE OUT DEGREE SYMBOL?
+mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2)
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=seq(from=0, to=60, by=10), las=1)
-legend(-452, 50, c('This work','Mills et al [2019]'), pch=c(15,15), col=c(rgb(.6,.2,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
-legend(-452, 50, c('This work','Mills et al [2019]'), pch=c('-',''), col=c(rgb(.6,.2,.6,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+legend(-452, 50, c('This work','Mills et al [2019]'), pch=c(15,15), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
+legend(-452, 50, c('This work','Mills et al [2019]'), pch=c('-',''), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+
 
 #dev.off()
 
