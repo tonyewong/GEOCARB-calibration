@@ -1,7 +1,7 @@
 ##==============================================================================
 ## analysis.R
 ##
-## These codes should be run after `process_results.R`, which will yield the 
+## These codes should be run after `process_results.R`, which will yield the
 ## chains_analysis_[datestamp].rds file named below, and before `plotting.R`,
 ## which will generate the plots for the paper based on the analysis conducted
 ## in this routine.
