@@ -73,12 +73,37 @@ experiments <- expand.grid(threshold = threshold_choices,
 experiments <- experiments[-which(experiments$use_co2==FALSE & experiments$use_temperature==FALSE),]
 
 for (ii in 1:nrow(experiments)) {
+  set.seed(1234*ii) # for reproducibility, but also for different samples for each experiment
   prcout_threshold <- experiments[ii,"threshold"]  # only save simulations with percent_outbound < this
   use_temperature <- experiments[ii,"use_temperature"]
   use_co2 <- experiments[ii,"use_co2"]
   source("lhs.R")
 }
 
+# supplementary threshold=0.3 and ct experiments, because not enough went through calibration windows:
+# copy/save results from the original seed; should be 4313 simulations
+file.copy(from="../output/lhs_param_ct_out30.RData", to="../output/lhs_param_ct_out30_seed13574.RData")
+file.copy(from="../output/lhs_covar_ct_out30.RData", to="../output/lhs_covar_ct_out30_seed13574.RData")
+
+ii <- 11
+set.seed(ii) # for reproducibility, but also for different samples for each experiment
+prcout_threshold <- experiments[ii,"threshold"]  # only save simulations with percent_outbound < this
+use_temperature <- experiments[ii,"use_temperature"]
+use_co2 <- experiments[ii,"use_co2"]
+source("lhs.R")
+# save results from this seed; should be 4302 simulations
+file.copy(from="../output/lhs_param_ct_out30.RData", to="../output/lhs_param_ct_out30_seed11.RData")
+file.copy(from="../output/lhs_covar_ct_out30.RData", to="../output/lhs_covar_ct_out30_seed11.RData")
+
+ii <- 11
+set.seed(2020) # for reproducibility, but also for different samples for each experiment
+prcout_threshold <- experiments[ii,"threshold"]  # only save simulations with percent_outbound < this
+use_temperature <- experiments[ii,"use_temperature"]
+use_co2 <- experiments[ii,"use_co2"]
+source("lhs.R")
+# save results from this seed; should be 4302 simulations
+file.copy(from="../output/lhs_param_ct_out30.RData", to="../output/lhs_param_ct_out30_seed2020.RData")
+file.copy(from="../output/lhs_covar_ct_out30.RData", to="../output/lhs_covar_ct_out30_seed2020.RData")
 
 
 ##==============================================================================

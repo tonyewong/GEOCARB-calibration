@@ -44,7 +44,6 @@ print("here for some reason?")
   n_sample_this_chunk[n_chunk] <- n_sample - (n_chunk-1)*n_sample_per_chunk
 
   # sample the constant parameters from one large LHS and divide
-  set.seed(2020)
   parameters_lhs <- randomLHS(n_sample, n_parameters)
   # constant parameter sampling
   n_const_calib <- length(ind_const_calib)
