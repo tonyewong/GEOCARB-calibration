@@ -34,7 +34,7 @@ if (n_sample <= n_sample_per_chunk) {
   par_calib <- parameters_lhs  # initialize
 
 #TODO
-print("here for some reason?")
+print("here for some reason? Not used")
 #do simulations... only return the results with at most 50% %outbound
 
 } else {
@@ -45,16 +45,38 @@ print("here for some reason?")
 
   # sample the constant parameters from one large LHS and divide
   parameters_lhs <- randomLHS(n_sample, n_parameters)
+
   # constant parameter sampling
   n_const_calib <- length(ind_const_calib)
   par_calib_tmp <- parameters_lhs  # initialize
   colnames(par_calib_tmp) <- parnames_const_calib
-  for (i in 1:n_const_calib) {
-    row_num <- match(parnames_const_calib[i],input$parameter)
+  for (ii in 1:n_const_calib) {
+    row_num <- match(parnames_const_calib[ii],input$parameter)
+    parname <- as.character(input[row_num,"parameter"])
     if(input[row_num, 'distribution_type']=='gaussian') {
-      par_calib_tmp[,i] <- qnorm(p=parameters_lhs[,ind_const_calib[i]], mean=input[row_num,"mean"], sd=(0.5*input[row_num,"two_sigma"]))
+      # scale the parameters so they won't be outside the bounds for the actual parameter values
+      new_bounds <- c(0,1)
+      if (!is.na(bounds[parname,"lower"])) {
+        new_bounds[1] <- pnorm(q=bounds[parname, "lower"], mean=input[row_num,"mean"], sd=(0.5*input[row_num,"two_sigma"]))
+      }
+      if (!is.na(bounds[parname,"upper"])) {
+        new_bounds[2] <- pnorm(q=bounds[parname, "upper"], mean=input[row_num,"mean"], sd=(0.5*input[row_num,"two_sigma"]))
+      }
+      # scale parameters
+      parameters_lhs[,ind_const_calib[ii]] <- parameters_lhs[,ind_const_calib[ii]]*(new_bounds[2]-new_bounds[1]) + new_bounds[1]
+      par_calib_tmp[,ii] <- qnorm(p=parameters_lhs[,ind_const_calib[ii]], mean=input[row_num,"mean"], sd=(0.5*input[row_num,"two_sigma"]))
     } else if(input[row_num, 'distribution_type']=='lognormal') {
-      par_calib_tmp[,i] <- qlnorm(p=parameters_lhs[,ind_const_calib[i]], meanlog=log(input[row_num,"mean"]), sdlog=log(0.5*input[row_num,"two_sigma"]))
+      # scale the parameters so they won't be outside the bounds for the actual parameter values
+      new_bounds <- c(0,1)
+      if (!is.na(bounds[parname,"lower"])) {
+        new_bounds[1] <- plnorm(q=bounds[parname, "lower"], meanlog=log(input[row_num,"mean"]), sdlog=log(0.5*input[row_num,"two_sigma"]))
+      }
+      if (!is.na(bounds[parname,"upper"])) {
+        new_bounds[2] <- plnorm(q=bounds[parname, "upper"], meanlog=log(input[row_num,"mean"]), sdlog=log(0.5*input[row_num,"two_sigma"]))
+      }
+      # scale parameters
+      parameters_lhs[,ind_const_calib[ii]] <- parameters_lhs[,ind_const_calib[ii]]*(new_bounds[2]-new_bounds[1]) + new_bounds[1]
+      par_calib_tmp[,ii] <- qlnorm(p=parameters_lhs[,ind_const_calib[ii]], meanlog=log(input[row_num,"mean"]), sdlog=log(0.5*input[row_num,"two_sigma"]))
     } else {
       print('ERROR - unknown prior distribution type')
     }

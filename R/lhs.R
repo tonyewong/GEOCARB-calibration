@@ -62,6 +62,36 @@ source('constraints.R')
 
 
 ##==============================================================================
+## Establish upper and lower bounds for each parameter
+## (NA if none (inf))
+##====================================================
+
+bounds <- mat.or.vec(nr=length(ind_const_calib), nc=2)
+colnames(bounds) <- c("lower","upper")
+rownames(bounds) <- parnames_const_calib
+for (ii in 1:nrow(bounds)) {
+  row_num <- match(parnames_const_calib[ii],input$parameter)
+  if (as.vector(input[row_num,"lower_limit"]) != "_inf") {
+    # there is a lower bound
+    bounds[ii,"lower"] <- as.numeric(as.vector(input[row_num,"lower_limit"]))
+  } else {
+    # no lower bound
+    bounds[ii,"lower"] <- NA
+  }
+  if (is.finite(input[row_num,"upper_limit"])) {
+    # there is an upper bound
+    bounds[ii,"upper"] <- input[row_num,"upper_limit"]
+  } else {
+    # no upper bound
+    bounds[ii,"upper"] <- NA
+  }
+}
+
+##==============================================================================
+
+
+
+##==============================================================================
 ## Do the actual sampling
 ##========================
 

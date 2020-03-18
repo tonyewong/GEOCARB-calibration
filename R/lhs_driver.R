@@ -72,11 +72,11 @@ experiments <- expand.grid(threshold = threshold_choices,
 # remove the experiments with both use_co2 = use_temperatures = FALSE
 experiments <- experiments[-which(experiments$use_co2==FALSE & experiments$use_temperature==FALSE),]
 
-for (ii in 1:nrow(experiments)) {
-  set.seed(1234*ii) # for reproducibility, but also for different samples for each experiment
-  prcout_threshold <- experiments[ii,"threshold"]  # only save simulations with percent_outbound < this
-  use_temperature <- experiments[ii,"use_temperature"]
-  use_co2 <- experiments[ii,"use_co2"]
+for (idx_experiment in 1:nrow(experiments)) {
+  set.seed(1234*idx_experiment) # for reproducibility, but also for different samples for each experiment
+  prcout_threshold <- experiments[idx_experiment,"threshold"]  # only save simulations with percent_outbound < this
+  use_temperature <- experiments[idx_experiment,"use_temperature"]
+  use_co2 <- experiments[idx_experiment,"use_co2"]
   source("lhs.R")
 }
 
@@ -85,21 +85,21 @@ for (ii in 1:nrow(experiments)) {
 file.copy(from="../output/lhs_param_ct_out30.RData", to="../output/lhs_param_ct_out30_seed13574.RData")
 file.copy(from="../output/lhs_covar_ct_out30.RData", to="../output/lhs_covar_ct_out30_seed13574.RData")
 
-ii <- 11
-set.seed(ii) # for reproducibility, but also for different samples for each experiment
-prcout_threshold <- experiments[ii,"threshold"]  # only save simulations with percent_outbound < this
-use_temperature <- experiments[ii,"use_temperature"]
-use_co2 <- experiments[ii,"use_co2"]
+idx_experiment <- 11
+set.seed(idx_experiment) # for reproducibility, but also for different samples for each experiment
+prcout_threshold <- experiments[idx_experiment,"threshold"]  # only save simulations with percent_outbound < this
+use_temperature <- experiments[idx_experiment,"use_temperature"]
+use_co2 <- experiments[idx_experiment,"use_co2"]
 source("lhs.R")
 # save results from this seed; should be 4302 simulations
 file.copy(from="../output/lhs_param_ct_out30.RData", to="../output/lhs_param_ct_out30_seed11.RData")
 file.copy(from="../output/lhs_covar_ct_out30.RData", to="../output/lhs_covar_ct_out30_seed11.RData")
 
-ii <- 11
+idx_experiment <- 11
 set.seed(2020) # for reproducibility, but also for different samples for each experiment
-prcout_threshold <- experiments[ii,"threshold"]  # only save simulations with percent_outbound < this
-use_temperature <- experiments[ii,"use_temperature"]
-use_co2 <- experiments[ii,"use_co2"]
+prcout_threshold <- experiments[idx_experiment,"threshold"]  # only save simulations with percent_outbound < this
+use_temperature <- experiments[idx_experiment,"use_temperature"]
+use_co2 <- experiments[idx_experiment,"use_co2"]
 source("lhs.R")
 # save results from this seed; should be 4302 simulations
 file.copy(from="../output/lhs_param_ct_out30.RData", to="../output/lhs_param_ct_out30_seed2020.RData")

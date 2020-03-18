@@ -193,16 +193,24 @@ windows$temp_sol <- windows$temp + array(rep(7.4*time/570,2), dim=c(58,2))
 bb <- "30"
 dd <- "ct"
 
+# don't want to plot proxy windows for time periods without data
+idx_no_data <- which(windows$co2[,"low"]==0 | windows$co2[,"high"]==50000)
+idx_data <- setdiff(1:n_time, idx_no_data)
+ifirst <- idx_data[1]
+idx_data <- c(ifirst-1, idx_data) # start time series 1 earlier for continuity in the figure
+
+
 pdf('../figures/model_vs_proxy.pdf',width=4,height=6,colormodel='cmyk', pointsize=11)
 
-par(mfrow=c(2,1), mai=c(0.6,.9,.15,.15))
-plot(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), type='l', xlim=c(-450,0), ylim=c(0,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+par(mfrow=c(2,1), mai=c(0.6,.9,.18,.15))
+plot(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), type='l', xlim=c(-425,0), ylim=c(-0.3,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
-polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.025"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.975"]))), col=rgb(0,0,.6,.25), border=NA)
-polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.05"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.95"]))), col=rgb(0,0,.6,.45), border=NA)
-polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.25"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.75"]))), col=rgb(0,0,.6,.65), border=NA)
-polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
-lines(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,0,.6))
+polygon(-c(time[idx_data],rev(time[idx_data])), log10(c(windows$co2[idx_data,"high"],rev(windows$co2[idx_data,"low"]))), col=rgb(.5,.5,.5,.5), border=1, lty=5)
+polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.025"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.975"]))), col=rgb(0,.15,.7,.25), border=NA)
+polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.05"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.95"]))), col=rgb(0,.15,.7,.45), border=NA)
+polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.25"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
+#polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
+lines(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,.15,.7))
 mtext('Time [Myr ago]', side=1, line=2.1)
 mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5)
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
@@ -210,15 +218,16 @@ ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
-legend(-450, log10(8), c('This work','Foster et al [2017]'), pch=c(15,15), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
-legend(-450, log10(8), c('This work','Foster et al [2017]'), pch=c('-',''), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+legend(-420, 0.65, c('This work (median and 50%, 90% and 95% ranges)','Foster et al [2017]'), pch=c(15,15), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
+legend(-420, 0.65, c('This work (median and 50%, 90% and 95% ranges)','Foster et al [2017]'), pch=c('-',''), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+mtext(side=3, text=expression(bold('   a')), line=0, cex=1, adj=-0.24);
 
-plot(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], type='l', xlim=c(-450,0), ylim=c(0,50), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,53), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
+polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=5)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.025"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.05"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.25"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=NA)
 lines(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
 mtext('Time [Myr ago]', side=1, line=2.1)
 mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2)
@@ -226,10 +235,12 @@ axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=seq(from=0, to=60, by=10), las=1)
-legend(-450, 50, c('This work','Mills et al [2019]'), pch=c(15,15), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
-legend(-450, 50, c('This work','Mills et al [2019]'), pch=c('-',''), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+legend(-420, 53, c('This work (median and 50%, 90% and 95% ranges)','Mills et al [2019]'), pch=c(15,15), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
+legend(-420, 53, c('This work (median and 50%, 90% and 95% ranges)','Mills et al [2019]'), pch=c('-',''), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+mtext(side=3, text=expression(bold('   b')), line=0, cex=1, adj=-0.24);
 
 dev.off()
+
 ##==============================================================================
 
 
@@ -256,7 +267,7 @@ glac_density <- density(par_calib[[bb]][[dd]][,iglac], from=1, to=5)
 icsg <- match('deltaT2Xglac', parnames_calib)
 deltaT2Xglac_density <- density(par_calib[[bb]][[dd]][,icsg], from=0, to=25)
 
-
+# compare against deltaT2X from previous work
 pr2011_dat <- read.csv('../input_data/ParkRoyer2011_Fig3_85varred.csv')
 pr2011_cdf <- approxfun(pr2011_dat[,1], pr2011_dat[,4])
 pr2011_icdf <- approxfun(pr2011_dat[,4], pr2011_dat[,1])
@@ -285,6 +296,10 @@ x_5_95_pr2011 <- pr2011_icdf(c(.05,.5,.95))
 x_5_95_thisstudy <- quantile(par_calib[[bb]][[dd]][,ics], c(.05,.5,.95))  #
 x_5_95_glac <- quantile(par_calib[[bb]][[dd]][,ics]*par_calib[[bb]][[dd]][,iglac], c(.05,.5,.95))  #
 x_ktc2017 <- c(3.7, 5.6, 7.5)
+
+# deltaT2X quantiles from the prior distribution: P = Pr(dT2X <= Q)
+# --> P = int_0^Q f(x) dx, where f(x) is the truncated log-normal
+
 
 ##
 ## figure comparing the 30%-outbound ct experiment
@@ -328,7 +343,7 @@ width <- 0.5
 offset <- 0.15
 colors <- vector("list", 3); names(colors) <- data_sets
 alphas <- c(0.45, 0.65)
-colors$c <- c(rgb(0,0,0.5,alphas[1]), rgb(0,0,0.9,alphas[2]))
+colors$c <- c(rgb(0,.1,0.6,alphas[1]), rgb(0,.15,0.75,alphas[2]))
 colors$t <- c(rgb(0.5,0,0,alphas[1]), rgb(0.8,0,0,alphas[2]))
 colors$ct <- c(rgb(0.5,0,0.5,alphas[1]), rgb(0.85,0,0.85,alphas[2]))
 
@@ -441,19 +456,19 @@ source("time_series_plot.R")
 pdf('../figures/time_series_parameters.pdf',width=6,height=8,colormodel='cmyk', pointsize=11)
 par(mfrow=c(4,3), mai=c(0.6,.65,.15,.15))
 
-pp <- 1; ylims <- c(60,105); dy <- 5; units <- "[units]"; time_series_plot()
-legend(-450, 106, c("a priori","a posteriori"), pch=c(15,15), col=c(rgb(.5,.5,.5,.5), rgb(0,0,.6,.5)), pt.cex=1.2, cex=1.1, bty='n')
-pp <- 2; ylims <- c(-2,6); dy <- 1; units <- "[units]"; time_series_plot()
-pp <- 3; ylims <- c(10,35); dy <- 5; units <- "[units]"; time_series_plot()
-pp <- 4; ylims <- c(0,1.5); dy <- 0.25; units <- "[units]"; time_series_plot()
-pp <- 5; ylims <- c(0,3); dy <- 0.5; units <- "[units]"; time_series_plot()
-pp <- 6; ylims <- c(0,2); dy <- 0.5; units <- "[units]"; time_series_plot()
-pp <- 7; ylims <- c(0,2); dy <- 0.5; units <- "[units]"; time_series_plot()
-pp <- 8; ylims <- c(0,2); dy <- 0.5; units <- "[units]"; time_series_plot()
-pp <- 9; ylims <- c(0,.12); dy <- 0.02; units <- "[units]"; time_series_plot()
-pp <- 10; ylims <- c(-6,8); dy <- 2; units <- "[units]"; time_series_plot()
-pp <- 11; ylims <- c(0,4); dy <- 1; units <- "[units]"; time_series_plot()
-pp <- 12; ylims <- c(0,2); dy <- 0.5; units <- "[units]"; time_series_plot()
+pp <- 1; ylims <- c(60,103); dy <- 5; units <- "[0.70XX]"; time_series_plot()
+legend(-450, 105, c("a priori","a posteriori"), pch=c(15,15), col=c(rgb(.5,.5,.5,.5), rgb(.6,0,0,.5)), pt.cex=1.2, cex=1.1, bty='n')
+pp <- 2; ylims <- c(-2,6); dy <- 1; units <- "[per mil]"; time_series_plot()
+pp <- 3; ylims <- c(10,35); dy <- 5; units <- "[per mil]"; time_series_plot()
+pp <- 4; ylims <- c(0,1.5); dy <- 0.25; units <- "[unitless]"; time_series_plot()
+pp <- 5; ylims <- c(0,3); dy <- 0.5; units <- "[unitless]"; time_series_plot()
+pp <- 6; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
+pp <- 7; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
+pp <- 8; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
+pp <- 9; ylims <- c(0,.12); dy <- 0.02; units <- "[1/K]"; time_series_plot()
+pp <- 10; ylims <- c(-6,8); dy <- 2; units <- expression("["*degree*"C]"); time_series_plot()
+pp <- 11; ylims <- c(0,4); dy <- 1; units <- "[unitless]"; time_series_plot()
+pp <- 12; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
 
 dev.off()
 
