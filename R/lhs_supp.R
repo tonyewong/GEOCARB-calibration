@@ -33,6 +33,7 @@ filename.covarout <- paste('../output/lhs_covar_',data_appen,'_out',prcout_thres
 filename.paramout <- paste('../output/lhs_param_',data_appen,'_out',prcout_threshold*100,'.RData',sep='')
 
 source("model_setup.R")
+source('run_geocarb_suppF.R')
 n_parameters <- length(parnames_const_calib)
 n_parameters_time <- length(parnames_time_calib)
 
