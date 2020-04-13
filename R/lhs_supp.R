@@ -34,6 +34,7 @@ filename.paramout <- paste('../output/lhs_param_',data_appen,'_out',prcout_thres
 
 source("model_setup.R")
 source('run_geocarb_suppF.R')
+source('model_forMCMC_supp.R')
 n_parameters <- length(parnames_const_calib)
 n_parameters_time <- length(parnames_time_calib)
 
