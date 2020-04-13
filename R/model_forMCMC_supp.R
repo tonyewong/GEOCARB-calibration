@@ -1,5 +1,5 @@
 ##==============================================================================
-## model_forMCMC.R
+## model_forMCMC_supp.R
 ##
 ## Input:
 ##  par_calib        vector of scalar input parameters
@@ -42,7 +42,7 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
-model_forMCMC <- function(par_calib, par_time, par_fixed, parnames_calib,
+model_forMCMC_supp <- function(par_calib, par_time, par_fixed, parnames_calib,
                           parnames_fixed, parnames_time, age, ageN,
                           ind_const_calib, ind_time_calib,
                           ind_const_fixed, ind_time_fixed,
@@ -69,7 +69,7 @@ model_forMCMC <- function(par_calib, par_time, par_fixed, parnames_calib,
   # set up the time-varying parameter matrix
   Matrix_12_unordered <- par_time
 
-  geoRes <- run_geocarbF(Matrix_56=Matrix_56_unordered,
+  geoRes <- run_geocarb_suppF(Matrix_56=Matrix_56_unordered,
                          Matrix_12=Matrix_12_unordered,
                          age=age,
                          ageN=ageN,

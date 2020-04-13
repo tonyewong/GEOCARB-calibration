@@ -28,7 +28,7 @@ time_series_plot <- function() {
 
   plot(-time, time_series_from_priors_quantiles[,"0.5",pp], type='l', xlim=c(-450,0), ylim=ylims, xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
   grid()
-  polygon(-c(time,rev(time)), c(time_series_from_priors_quantiles[,"0.025",pp],rev(time_series_from_priors_quantiles[,"0.975",pp])), col=rgb(.5,.5,.5,.25), border=NA)
+  polygon(-c(time,rev(time)), c(time_series_from_priors_quantiles[,"0.025",pp],rev(time_series_from_priors_quantiles[,"0.975",pp])), col=rgb(.5,.5,.5,.4), border=NA)
   lines(-time, time_series_from_priors_quantiles[,"0.5",pp], lwd=1, lty=1, col=rgb(.5,.5,.5))
   polygon(-c(time,rev(time)), c(par_time_quantiles[[bb]][[dd]][,"0.025",pp],rev(par_time_quantiles[[bb]][[dd]][,"0.975",pp])), col=rgb(.6,0,0,.25), border=NA)
   lines(-time, par_time_quantiles[[bb]][[dd]][,"0.5",pp], lwd=1, lty=1, col=rgb(.6,0,0))

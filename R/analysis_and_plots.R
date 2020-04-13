@@ -85,7 +85,9 @@ for (bb in prc_outbound) {
             par_calib[[bb]][[dd]] <- rbind(par_calib[[bb]][[dd]], cbind(par_calib_save, rep(0,nrow(par_calib_save))))
             par_time[[bb]][[dd]] <- abind(par_time[[bb]][[dd]], par_time_save, along=2)
             # third simulation set, with seed=2020
-            #TODO...
+            load(paste("../output/lhs_param_ct_out30_seed2020.RData", sep=""))
+            par_calib[[bb]][[dd]] <- rbind(par_calib[[bb]][[dd]], cbind(par_calib_save, rep(0,nrow(par_calib_save))))
+            par_time[[bb]][[dd]] <- abind(par_time[[bb]][[dd]], par_time_save, along=2)
             # trim down to 10,000 (or whatever num_samples is above) to match the other simulations
         }
         ## quantiles for the constant parameters
@@ -205,8 +207,9 @@ pdf('../figures/model_vs_proxy.pdf',width=4,height=6,colormodel='cmyk', pointsiz
 par(mfrow=c(2,1), mai=c(0.6,.9,.18,.15))
 plot(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), type='l', xlim=c(-425,0), ylim=c(-0.3,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
-polygon(-c(time[idx_data],rev(time[idx_data])), log10(c(windows$co2[idx_data,"high"],rev(windows$co2[idx_data,"low"]))), col=rgb(.5,.5,.5,.5), border=1, lty=5)
-polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.025"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.975"]))), col=rgb(0,.15,.7,.25), border=NA)
+polygon(-c(time[idx_data],rev(time[idx_data])), log10(c(windows$co2[idx_data,"high"],rev(windows$co2[idx_data,"low"]))), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+igood <- which(is.finite(model_quantiles[[bb]]$t$co2[,"0.025"])); lines(-time[igood], log10(model_quantiles[[bb]]$t$co2[igood,"0.025"]), lwd=1, lty=5)
+igood <- which(is.finite(model_quantiles[[bb]]$t$co2[,"0.975"])); lines(-time[igood], log10(model_quantiles[[bb]]$t$co2[igood,"0.975"]), lwd=1, lty=5)
 polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.05"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.95"]))), col=rgb(0,.15,.7,.45), border=NA)
 polygon(-c(time,rev(time)), log10(c(model_quantiles[[bb]][[dd]]$co2[,"0.25"],rev(model_quantiles[[bb]][[dd]]$co2[,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
 #polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
@@ -218,13 +221,15 @@ ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
-legend(-420, 0.65, c('This work (median and 50%, 90% and 95% ranges)','Foster et al [2017]'), pch=c(15,15), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
-legend(-420, 0.65, c('This work (median and 50%, 90% and 95% ranges)','Foster et al [2017]'), pch=c('-',''), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+legend(-420, 0.6, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al [2017]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1)
+legend(-420, 0.6, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al [2017]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   a')), line=0, cex=1, adj=-0.24);
 
-plot(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,53), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=5)
+igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.025"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.025"], lwd=1, lty=5)
+igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.975"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.975"], lwd=1, lty=5)
+polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.025"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.05"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.25"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
@@ -235,8 +240,8 @@ axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=seq(from=0, to=60, by=10), las=1)
-legend(-420, 53, c('This work (median and 50%, 90% and 95% ranges)','Mills et al [2019]'), pch=c(15,15), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1.6)
-legend(-420, 53, c('This work (median and 50%, 90% and 95% ranges)','Mills et al [2019]'), pch=c('-',''), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1.6)
+legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1)
+legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   b')), line=0, cex=1, adj=-0.24);
 
 dev.off()
@@ -478,25 +483,96 @@ dev.off()
 
 ##==============================================================================
 ##
+## report numbers for the manuscript
+##
+
+## deltaT2X in "control" experiment
+range <- round(par_quantiles$`30`$ct["deltaT2X",c("0.05","0.95","0.5")],4)
+print(paste("50% (5-95%) range for deltaT2X is:",range[3], range[1], range[2]))
+
+## Pr(deltaT2X >= 6 deg C)
+pr <- length(which(par_calib$`30`$ct[,"deltaT2X"] >= 6))/nrow(par_calib$`30`$ct)
+print(paste("Pr(deltaT2X >= 6) =",round(pr,4)))
+
+## GLAC in "control" experiment
+range <- round(par_quantiles$`30`$ct["GLAC",c("0.05","0.95","0.5")],4)
+print(paste("50% (5-95%) range for GLAC is:",range[3], range[1], range[2]))
+
+## deltaT2X*GLAC in "control" experiment
+range <- round(par_quantiles$`30`$ct["deltaT2Xglac",c("0.05","0.95","0.5")],4)
+print(paste("50% (5-95%) range for deltaT2X is:",range[3], range[1], range[2]))
+
+##==============================================================================
+
+
+
+##==============================================================================
+##
 ## what variable is correlated to temperature at age = 100 Myr (or thereabouts)
 ##
 
-age_of_interest <- c(90,100,110)
+age_of_interest <- seq(90,140,by=10)
 idx_of_interest <- match(age_of_interest, time)
-
 bb <- "40"
 dd <- "t"
-mat <- cbind(par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]],], t(model_hindcast[[bb]][[dd]]$temp[idx_of_interest,]))
+temp_of_interest <- apply(model_hindcast[[bb]][[dd]]$temp[idx_of_interest,], MARGIN=2, FUN=mean)
 
-res2 <-cor.test(mat,  method = "spearman")
+## correlations with the constant parameters
+mat <- cbind(par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]],], temp_of_interest)
+cor_spearman <- cor_pearson <- rep(NA, length(parnames_calib))
+for (pp in 1:length(parnames_calib)) {
+    cor_spearman[pp] <- cor(mat[,pp], temp_of_interest,  method = "spearman")
+    cor_pearson[pp] <- cor(mat[,pp], temp_of_interest,  method = "pearson")
+}
+cor_mat <- cbind(1:57, cor_spearman, cor_pearson)
 
-ii <- 10
-jj <- 1+jj
-res1 <- cor.test(mat[,ii], mat[,jj],  method = "spearman")
-plot(mat[,ii], mat[,jj], main=paste(round(res1$estimate,4),"   ",round(res1$p.value,4)), xlab=ii, ylab=jj)
+print(cor_mat[rev(order(abs(cor_spearman))),])
 
 
-todo
+## correlations with the time series parameters
+bb <- "40"
+dd <- "t"
+mat_time <- t(par_time[[bb]][[dd]][,,1])
+for (pp in 2:n_parameters_time) {
+  mat_time <- cbind(mat_time, t(par_time[[bb]][[dd]][,,pp]))
+}
+cor_spearman_time <- cor_pearson_time <- rep(NA, n_parameters_time*n_time)
+for (pp in 1:(n_parameters_time*n_time)) {
+    cor_spearman_time[pp] <- cor(mat_time[,pp], temp_of_interest,  method = "spearman")
+    cor_pearson_time[pp] <- cor(mat_time[,pp], temp_of_interest,  method = "pearson")
+}
+cor_mat_time <- cbind(1:(n_parameters_time*n_time), cor_spearman_time, cor_pearson_time)
+
+tmp <- cor_mat_time[rev(order(abs(cor_spearman_time))),]
+print(tmp[1:30,])
+
+## find none of the time series quantities correlated with high temperatures
+## with pearson or spearman corr higher than about 0.03-0.04
+
+
+##
+##
+##
+
+## which simulations are in the highest precalibration window for temperature?
+## timestep 49, at Age = 90 Myr age, 27.253119 45.06483 deg C
+
+age_hiT <- 90 # Myr ago
+idx_hiT <- vector("list", length(prc_outbound)); names(idx_hiT) <- prc_outbound
+par_calib_hiT <- NULL
+for (bb in prc_outbound) {
+  idx_hiT[[bb]] <- which( (model_hindcast[[bb]]$ct$temp[match(age_hiT, age),] >= windows$temp[match(age_hiT, age),"low"]) &
+                          (model_hindcast[[bb]]$ct$temp[match(age_hiT, age),] <= windows$temp[match(age_hiT, age),"high"]) )
+  par_calib_hiT <- rbind(par_calib_hiT, par_calib[[bb]]$ct[idx_hiT[[bb]],])
+}
+
+pp <- 0
+pp <- pp+1
+hist(par_calib$`30`$ct[,pp], freq=FALSE)
+hist(par_calib_hiT[,pp], freq=FALSE, col=rgb(.5,.5,.5,.4), lty=5, add=TRUE)
+## pp = 15, 22, 24 higher values
+## pp = 21, 44 lower values
+
 
 ##==============================================================================
 
