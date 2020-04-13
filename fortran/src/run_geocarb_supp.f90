@@ -345,16 +345,17 @@ Rca = Rca_570
           fBB = (1.0+ACTcarb*GCM*log(RCO2)-ACTcarb*Ws*(t/570.0)+ACTcarb*GEOG(i))*(2.0*RCO2/(1.0+RCO2))**FERT
         end if
 
+        ! experiment to change the period of ramping and GYM
+        age_gym_ang_beg = 110.0
+        age_gym_ang_end = 60.0
+        gym_fac = 0.25
+
         ! vegetation = gymnosperm domination
         if ((t .le. 350.0) .AND. (t .gt. age_gym_ang_beg))  then
           fE = GYM
 !!!          113 PRINT *, "fE is: ", fE
         end if
 
-        ! experiment to change the period of ramping and GYM
-        age_gym_ang_beg = 110.0
-        age_gym_ang_end = 60.0
-        gym_fac = 0.25
         ! for this period only, modify GYM
         GYM = GYM*gym_fac
 
