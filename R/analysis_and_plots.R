@@ -502,6 +502,60 @@ print(paste("50% (5-95%) range for GLAC is:",range[3], range[1], range[2]))
 range <- round(par_quantiles$`30`$ct["deltaT2Xglac",c("0.05","0.95","0.5")],4)
 print(paste("50% (5-95%) range for deltaT2X is:",range[3], range[1], range[2]))
 
+## prior and posterior 5-95% ranges and means/medians
+som_parameters_table <- mat.or.vec(nr=56, nc=6)
+colnames(som_parameters_table) <- c("prior mean", "prior 5th percentile", "prior 95th percentile",
+                                    "posterior median", "posterior 5th percentile", "posterior 95th percentile")
+rownames(som_parameters_table) <- parnames_calib[1:56]
+for (pp in rownames(som_parameters_table)) {
+  # priors
+  idx_match <- match(pp,input[,"parameter"])
+  som_parameters_table[pp,"prior mean"] <- input[idx_match,"mean"]
+  if (input[idx_match,"distribution_type"] == "gaussian") {
+    if (is.infinite(input[idx_match,"upper_limit"])) {
+      if (input[idx_match,"lower_limit"]=="_inf") {
+        # Gaussian business as usual
+        p05 <- qnorm(p=0.05, mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+        p95 <- qnorm(p=0.95, mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+      } else {
+        # lower bound some number alpha, upper bound infinity, so pdf is pdf/(1-cdf(alpha))
+        cdf <- pnorm(as.numeric(as.vector(input[idx_match,"lower_limit"])), mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+        p05 <- qnorm(0.05+(1-0.05)*cdf, mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+        p95 <- qnorm(0.95+(1-0.95)*cdf, mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+      }
+    } else {
+      # must have a finite upper bound...
+      if (input[idx_match,"lower_limit"]=="_inf") {
+        # infinite lower bound
+        # --> this case doesn't happen, but put an error message here just in case
+        print("ERROR: half-infinite support case not supported")
+      } else {
+        # finite bounds
+        cdf_low <- pnorm(as.numeric(as.vector(input[idx_match,"lower_limit"])), mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+        cdf_high <- pnorm(as.numeric(as.vector(input[idx_match,"upper_limit"])), mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+        p05 <- qnorm(0.05*cdf_high+(1-0.05)*cdf_low, mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+        p95 <- qnorm(0.95*cdf_high+(1-0.95)*cdf_low, mean=input[idx_match,"mean"], sd=(0.5*input[idx_match,"two_sigma"]))
+      }
+    }
+  } else if (input[idx_match,"distribution_type"] == "lognormal") {
+    if (is.infinite(input[idx_match,"upper_limit"])) {
+      # only case is deltaT2X
+      # lower bound some number alpha, upper bound infinity, so pdf is pdf/(1-cdf(alpha))
+      cdf <- plnorm(as.numeric(as.vector(input[idx_match,"lower_limit"])), meanlog=log(input[idx_match,"mean"]), sdlog=log(0.5*input[idx_match,"two_sigma"]))
+      p05 <- qlnorm(0.05+(1-0.05)*cdf, meanlog=log(input[idx_match,"mean"]), sdlog=log(0.5*input[idx_match,"two_sigma"]))
+      p95 <- qlnorm(0.95+(1-0.95)*cdf, meanlog=log(input[idx_match,"mean"]), sdlog=log(0.5*input[idx_match,"two_sigma"]))
+    } else {
+      # --> this case doesn't happen, but put an error message here just in case
+      print("ERROR: finite upper bound log-normal case not supported")
+    }
+  } else {print("ERROR: unknown distribution type")}
+  som_parameters_table[pp,c("prior 5th percentile", "prior 95th percentile")] <- round(c(p05,p95), 4)
+  # posteriors
+  som_parameters_table[pp,c("posterior median", "posterior 5th percentile", "posterior 95th percentile")] <- round(par_quantiles$`30`$ct[pp,c("0.5","0.25","0.95")],4)
+}
+# write to CSV
+write.csv(x=som_parameters_table, file="../output/som_parameters_table.csv")
+
 ##==============================================================================
 
 
