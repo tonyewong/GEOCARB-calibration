@@ -50,6 +50,7 @@ if(.Platform$OS.type == "unix") {
 
 run_geocarb_suppF <- function(Matrix_56,
                          Matrix_12,
+                         supp_experiment_parameters=c(130,80,1),
                          age,
                          ageN,
                          iteration_threshold,
@@ -64,15 +65,18 @@ run_geocarb_suppF <- function(Matrix_56,
 
   # fortran version
   f.output <- .Fortran('run_geocarb_supp',
-                          Matrix_56 = as.double(Matrix_56_ordered),
-                          Matrix_12 = as.double(Matrix_12_ordered),
-                          age       = as.double(age),
-                          ageN      = as.integer(ageN),
-                          iteration_threshold = as.integer(iteration_threshold),
-                          CO2_out   = as.double(rep(-999.99, ageN)),
-                          O2_out    = as.double(rep(-999.99, ageN)),
-                          temp_out  = as.double(rep(-999.99, ageN))
-                          )
+                       Matrix_56 = as.double(Matrix_56_ordered),
+                       Matrix_12 = as.double(Matrix_12_ordered),
+                       age_gym_ang_beg = supp_experiment_parameters[1],
+                       age_gym_ang_end = supp_experiment_parameters[2],
+                       gym_fac = supp_experiment_parameters[3],
+                       age       = as.double(age),
+                       ageN      = as.integer(ageN),
+                       iteration_threshold = as.integer(iteration_threshold),
+                       CO2_out   = as.double(rep(-999.99, ageN)),
+                       O2_out    = as.double(rep(-999.99, ageN)),
+                       temp_out  = as.double(rep(-999.99, ageN))
+                       )
   # r version
   ###f.output <- GEOCARBSULFvolc_forMCMC(Matrix_56_ordered, Matrix_12_ordered, age, ageN)
 

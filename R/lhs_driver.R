@@ -81,7 +81,7 @@ for (idx_experiment in 1:nrow(experiments)) {
 }
 
 # supplementary threshold=0.3 and ct experiments, because not enough went through calibration windows:
-# copy/save results from the original seed; should be 4313 simulations
+# copy/save results from the original seed; should be 4400 simulations
 file.copy(from="../output/lhs_param_ct_out30.RData", to="../output/lhs_param_ct_out30_seed13574.RData")
 file.copy(from="../output/lhs_covar_ct_out30.RData", to="../output/lhs_covar_ct_out30_seed13574.RData")
 

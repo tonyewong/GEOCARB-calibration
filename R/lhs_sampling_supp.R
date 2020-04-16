@@ -136,7 +136,8 @@ print("here for some reason? Not used")
                                  ind_time_fixed=ind_time_fixed,
                                  ind_expected_time=ind_expected_time,
                                  ind_expected_const=ind_expected_const,
-                                 iteration_threshold=iteration_threshold)
+                                 iteration_threshold=iteration_threshold,
+                                 supp_experiment_parameters=supp_experiment_parameters)
       model_co2_this_chunk[,ii] <- model_out[,"co2"]
       model_temp_this_chunk[,ii] <- model_out[,"temp"] + 15 # Note: Berner (2004; Eq 2.8 and 2.28) assumes present CO2 is 280 ppmv and T is 15 deg C
       ##    # normalize relative to "present" (t=0 Mya)

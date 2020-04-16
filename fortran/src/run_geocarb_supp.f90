@@ -7,12 +7,16 @@
 !================================================================================
 
 !---------------------------------------------------------------------------------
-subroutine run_geocarb_supp(Matrix_56, Matrix_12, age, ageN, iteration_threshold, CO2_out, O2_out, temp_out)
+subroutine run_geocarb_supp(Matrix_56, Matrix_12, age_gym_ang_beg, age_gym_ang_end, &
+                            gym_fac, age, ageN, iteration_threshold, CO2_out, O2_out, temp_out)
 !  ===============================================================================
 ! | Inputs:
 ! |    Variables:
 ! |     Matrix_56  	56 constant parameters
 ! |     Matrix_12   12 time-varying parameters, each of length ageN
+! |     age_gym_ang_beg    beginning age (Myr ago) for gymnosperm-angiosperm transition
+! |     age_gym_ang_end    ending age (Myr ago) for gymnosperm-angiosperm transition
+! |     gym_fac            multiplicative factor by which to modulate GYM during the GYM-ANG transition period
 ! |
 ! |    Parameters:
 ! |     age         age of time-step, in millions of years ago; 0-570 Ma
@@ -38,6 +42,9 @@ integer, intent(IN) :: iteration_threshold            ! maximum number of iterat
 real(DP), dimension(ageN), intent(IN) :: age          ! times of time series (myr ago)
 real(DP), dimension(56), intent(IN) :: Matrix_56      ! 56 constant parameters to be evaluated
 real(DP), dimension(58,ageN), intent(IN) :: Matrix_12 ! 12 time-series parameters to be evaluated, each of length ageN
+real(DP), intent(IN) :: age_gym_ang_beg               ! beginning age (Myr ago) for gymnosperm-angiosperm transition
+real(DP), intent(IN) :: age_gym_ang_end               ! ending age (Myr ago) for gymnosperm-angiosperm transition
+real(DP), intent(IN) :: gym_fac                       ! multiplicative factor by which to modulate GYM during the GYM-ANG transition period
 
 ! explicit output
 real(DP), dimension(ageN), intent(OUT) :: CO2_out
@@ -190,9 +197,6 @@ real(DP) :: fyos
 real(DP) :: RCO2
 real(DP) :: RCO2_old
 real(DP) :: Rg
-real(DP) :: age_gym_ang_beg ! experiment to change the gymnosperm/angiosperm-dominated cutoff age
-real(DP) :: age_gym_ang_end ! experiment to change the gymnosperm/angiosperm-dominated cutoff age
-real(DP) :: gym_fac         ! multiplicative factor by which to modulate GYM during the GYM-ANG transition period
 integer :: iteration_count
 LOGICAL :: failed_run
 
@@ -346,9 +350,10 @@ Rca = Rca_570
         end if
 
         ! experiment to change the period of ramping and GYM
-        age_gym_ang_beg = 110.0
-        age_gym_ang_end = 60.0
-        gym_fac = 0.25
+        !these are inputs now
+        !!age_gym_ang_beg = 110.0
+        !!age_gym_ang_end = 60.0
+        !!gym_fac = 1.0
 
         ! vegetation = gymnosperm domination
         if ((t .le. 350.0) .AND. (t .gt. age_gym_ang_beg))  then

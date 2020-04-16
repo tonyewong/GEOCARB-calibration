@@ -47,7 +47,7 @@ model_forMCMC_supp <- function(par_calib, par_time, par_fixed, parnames_calib,
                           ind_const_calib, ind_time_calib,
                           ind_const_fixed, ind_time_fixed,
                           ind_expected_time, ind_expected_const,
-                          iteration_threshold) {
+                          iteration_threshold, supp_experiment_parameters=c(130,80,1)) {
 
   # here, we are assuming that we will calibrate all of the parameters
   # par_calib = a vector of all of the constant parameters
@@ -71,6 +71,7 @@ model_forMCMC_supp <- function(par_calib, par_time, par_fixed, parnames_calib,
 
   geoRes <- run_geocarb_suppF(Matrix_56=Matrix_56_unordered,
                          Matrix_12=Matrix_12_unordered,
+                         supp_experiment_parameters=supp_experiment_parameters,
                          age=age,
                          ageN=ageN,
                          iteration_threshold=iteration_threshold,

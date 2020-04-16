@@ -71,12 +71,24 @@ experiments <- expand.grid(threshold = threshold_choices,
 # remove the experiments with both use_co2 = use_temperatures = FALSE
 experiments <- experiments[-which(experiments$use_co2==FALSE & experiments$use_temperature==FALSE),]
 
-for (idx_experiment in 1:nrow(experiments)) {
+# only doing the CO2+temperature experiment
+for (idx_experiment in c(3)) {
   set.seed(1234*idx_experiment) # for reproducibility, but also for different samples for each experiment
   prcout_threshold <- experiments[idx_experiment,"threshold"]  # only save simulations with percent_outbound < this
   use_temperature <- experiments[idx_experiment,"use_temperature"]
   use_co2 <- experiments[idx_experiment,"use_co2"]
+  # supplemental experiment modifying both GYM and timing
+  appen <- "gym+timing"; supp_experiment_parameters <- c(110,60,0.25)
   source("lhs_supp.R")
+  file.copy(from="../output/lhs_param_ct_out50.RData", to=paste("../output/lhs_param_ct_out50_",appen,".RData",sep=""))
+  # supplemental experiment modifying GYM but leaving timing alone
+  appen <- "gym"; supp_experiment_parameters <- c(130,80,0.25)
+  source("lhs_supp.R")
+  file.copy(from="../output/lhs_param_ct_out50.RData", to=paste("../output/lhs_param_ct_out50_",appen,".RData",sep=""))
+  # supplemental experiment modifying both timing but leaving GYM alone
+  appen <- "timing"; supp_experiment_parameters <- c(110,60,1)
+  source("lhs_supp.R")
+  file.copy(from="../output/lhs_param_ct_out50.RData", to=paste("../output/lhs_param_ct_out50_",appen,".RData",sep=""))
 }
 
 
