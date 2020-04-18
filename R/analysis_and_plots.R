@@ -608,25 +608,6 @@ print(tmp[1:30,])
 ##
 ##
 
-## which simulations are in the highest precalibration window for temperature?
-## timestep 49, at Age = 90 Myr age, 27.253119 45.06483 deg C
-
-age_hiT <- 90 # Myr ago
-idx_hiT <- vector("list", length(prc_outbound)); names(idx_hiT) <- prc_outbound
-par_calib_hiT <- NULL
-for (bb in prc_outbound) {
-  idx_hiT[[bb]] <- which( (model_hindcast[[bb]]$ct$temp[match(age_hiT, age),] >= windows$temp[match(age_hiT, age),"low"]) &
-                          (model_hindcast[[bb]]$ct$temp[match(age_hiT, age),] <= windows$temp[match(age_hiT, age),"high"]) )
-  par_calib_hiT <- rbind(par_calib_hiT, par_calib[[bb]]$ct[idx_hiT[[bb]],])
-}
-
-pp <- 0
-pp <- pp+1
-hist(par_calib$`30`$ct[,pp], freq=FALSE)
-hist(par_calib_hiT[,pp], freq=FALSE, col=rgb(.5,.5,.5,.4), lty=5, add=TRUE)
-## pp = 15, 22, 24 higher values
-## pp = 21, 44 lower values
-
 
 ##==============================================================================
 

@@ -144,6 +144,8 @@ print("here for some reason? Not used")
       # use the percent-outbound approach of Mill et al 2019 (Gondwana Research)
       prcout_co2[ii] <- percout(model_co2_this_chunk[,ii], windows$co2)
       prcout_temp[ii] <- percout(model_temp_this_chunk[,ii], windows$temp)
+      # note that Ws solar luminosity is subtracted out in run_geocarb.f90, to match Mills et al 2019.
+      # when plotting/analyzing, add Ws*t/570 back in. The + 15 above accounts for present-day T
     }
 
     # do the following for CO2-only, temperature-only, and CO2+temperature
