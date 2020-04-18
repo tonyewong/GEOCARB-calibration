@@ -199,26 +199,18 @@ lines(prcout_supp_sorted$`gym+timing`[,"temp"], log10(1-ecdf_values), col='purpl
 
 
 ##
+## report number of simulations below 40% and 30% outbound out of these 50% outbound ensembles
+##
+
+for (ee in supp_names) {
+  print(paste(ee,round(length(which(prcout_supp[[ee]][,"temp"] < 0.4))/num_samples,4), "of samples below 40%outbound"))
+  print(paste(ee,round(length(which(prcout_supp[[ee]][,"temp"] < 0.3))/num_samples,4), "of samples below 30%outbound"))
+  print(paste(ee,round(length(which(prcout_supp[[ee]][,"temp"] < 0.25))/num_samples,4), "of samples below 25%outbound"))
+}
+
+
+##
 ## plot showing hindcast comparison
-##
-
-TODO
-
-TODO - make usre you use windows$temp_sol
-
-
-
-
-
-
-##
-##
-##
-##
-##
-
-##
-## make a plot of the hindcasts relative to proxy data
 ##
 
 # don't want to plot proxy windows for time periods without data
@@ -227,8 +219,9 @@ idx_data <- setdiff(1:n_time, idx_no_data)
 ifirst <- idx_data[1]
 idx_data <- c(ifirst-1, idx_data) # start time series 1 earlier for continuity in the figure
 
-pdf('../figures/model_vs_proxy_supp.pdf',width=6,height=8,colormodel='cmyk', pointsize=11)
-par(mfrow=c(4,2), mai=c(0.6,.9,.18,.15))
+
+pdf('../figures/model_vs_proxy_supp.pdf',width=7.5,height=9.5,colormodel='cmyk', pointsize=11)
+par(mfrow=c(4,2), mai=c(0.45,.7,.18,.4))
 
 ## Control (ct prcout=50)
 ee <- 1
@@ -242,15 +235,15 @@ polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.05"],rev(
 polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.25"],rev(model_quantiles_supp[[ee]]$co2[,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
 #polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
 lines(-time, log10(model_quantiles_supp[[ee]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,.15,.7))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5, , cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), , cex.axis=1.2)
 ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,100000,10000)))
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
+axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1, , cex.axis=1.2)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
-legend(-420, 0.6, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al [2017]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1)
-legend(-420, 0.6, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al [2017]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1)
+legend(-420, 0.79, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al [2017]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
+legend(-420, 0.79, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al [2017]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   a')), line=0, cex=1, adj=-0.24);
 # -- temperature
 plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
@@ -262,15 +255,16 @@ polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(mode
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
 lines(-time, model_quantiles_supp$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2, cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), cex.axis=1.2)
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=seq(from=0, to=60, by=10), las=1)
-legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1)
-legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1)
+axis(2, at=seq(from=0, to=60, by=10), las=1, cex.axis=1.2)
+legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
+legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   b')), line=0, cex=1, adj=-0.24);
+mtext(side=4, text="Control", line=1.2, cex=1.2)
 
 ## GYM only
 ee <- 2
@@ -284,12 +278,12 @@ polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.05"],rev(
 polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.25"],rev(model_quantiles_supp[[ee]]$co2[,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
 #polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
 lines(-time, log10(model_quantiles_supp[[ee]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,.15,.7))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5, , cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), , cex.axis=1.2)
 ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,100000,10000)))
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
+axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1, , cex.axis=1.2)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
 mtext(side=3, text=expression(bold('   c')), line=0, cex=1, adj=-0.24);
 # -- temperature
@@ -302,13 +296,14 @@ polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(mode
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
 lines(-time, model_quantiles_supp$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2, cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), cex.axis=1.2)
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=seq(from=0, to=60, by=10), las=1)
+axis(2, at=seq(from=0, to=60, by=10), las=1, cex.axis=1.2)
 mtext(side=3, text=expression(bold('   d')), line=0, cex=1, adj=-0.24);
+mtext(side=4, text="0.25*GYM", line=1.2, cex=1.2)
 
 ## timing only
 ee <- 3
@@ -322,12 +317,12 @@ polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.05"],rev(
 polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.25"],rev(model_quantiles_supp[[ee]]$co2[,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
 #polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
 lines(-time, log10(model_quantiles_supp[[ee]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,.15,.7))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5, , cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), , cex.axis=1.2)
 ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,100000,10000)))
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
+axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1, , cex.axis=1.2)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
 mtext(side=3, text=expression(bold('   e')), line=0, cex=1, adj=-0.24);
 # -- temperature
@@ -340,13 +335,14 @@ polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(mode
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
 lines(-time, model_quantiles_supp$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2, cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), cex.axis=1.2)
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=seq(from=0, to=60, by=10), las=1)
+axis(2, at=seq(from=0, to=60, by=10), las=1, cex.axis=1.2)
 mtext(side=3, text=expression(bold('   f')), line=0, cex=1, adj=-0.24);
+mtext(side=4, text="timing", line=1.2, cex=1.2)
 
 ## GYM and timing
 ee <- 4
@@ -360,12 +356,12 @@ polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.05"],rev(
 polygon(-c(time,rev(time)), log10(c(model_quantiles_supp[[ee]]$co2[,"0.25"],rev(model_quantiles_supp[[ee]]$co2[,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
 #polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
 lines(-time, log10(model_quantiles_supp[[ee]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,.15,.7))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5, , cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), , cex.axis=1.2)
 ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,100000,10000)))
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
+axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1, , cex.axis=1.2)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
 mtext(side=3, text=expression(bold('   g')), line=0, cex=1, adj=-0.24);
 # -- temperature
@@ -378,13 +374,14 @@ polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(mode
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
 lines(-time, model_quantiles_supp$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
-mtext('Time [Myr ago]', side=1, line=2.1)
-mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2)
-axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
+mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2, cex=0.9)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), cex.axis=1.2)
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
-axis(2, at=seq(from=0, to=60, by=10), las=1)
+axis(2, at=seq(from=0, to=60, by=10), las=1, cex.axis=1.2)
 mtext(side=3, text=expression(bold('   h')), line=0, cex=1, adj=-0.24);
+mtext(side=4, text="0.25*GYM and timing", line=1.2, cex=1.2)
 
 dev.off()
 
