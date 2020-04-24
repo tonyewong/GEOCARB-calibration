@@ -126,15 +126,17 @@ for (bb in prc_outbound) {
 
 ## run hindcasts
 
-model_hindcast <- vector("list", length(prc_outbound))
-names(model_hindcast) <- prc_outbound
+model_hindcast <- prcout <- vector("list", length(prc_outbound))
+names(model_hindcast) <- names(prcout) <- prc_outbound
 
 for (bb in prc_outbound) {
-    model_hindcast[[bb]] <- vector("list", length(data_sets))
-    names(model_hindcast[[bb]]) <- data_sets
+    model_hindcast[[bb]] <- prcout[[bb]] <- vector("list", length(data_sets))
+    names(model_hindcast[[bb]]) <- names(prcout[[bb]]) <- data_sets
     for (dd in data_sets) {
-        model_hindcast[[bb]][[dd]] <- vector('list', 3)
+        model_hindcast[[bb]][[dd]] <- vector('list', 2)
         names(model_hindcast[[bb]][[dd]]) <- c("co2","temp")
+        prcout[[bb]][[dd]] <- mat.or.vec(nr=num_samples, nc=2)
+        colnames(prcout[[bb]][[dd]]) <- c("co2","temp")
         model_hindcast[[bb]][[dd]]$co2 <- model_hindcast[[bb]][[dd]]$temp <- mat.or.vec(nr=58, nc=num_samples)
         for (ii in 1:num_samples) {
             model_out<- model_forMCMC(par_calib=par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]][ii],],
@@ -152,6 +154,8 @@ for (bb in prc_outbound) {
                                        ind_expected_time=ind_expected_time,
                                        ind_expected_const=ind_expected_const,
                                        iteration_threshold=iteration_threshold)
+            prcout[[bb]][[dd]][ii,"co2"] <- percout(model_out[,"co2"], windows$co2)
+            prcout[[bb]][[dd]][ii,"temp"] <- percout(model_out[,"temp"] + 15, windows$temp)
             model_hindcast[[bb]][[dd]]$co2[,ii] <- model_out[,"co2"]
             model_hindcast[[bb]][[dd]]$temp[,ii] <- model_out[,"temp"] + par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]][ii],"Ws"]*model_out[,1]/570 + 15 # as in Berner 2004
             # ^-- adding the Ws*t/570 solar luminosity contribution back in, so we have actual temperatures
@@ -556,6 +560,16 @@ for (pp in rownames(som_parameters_table)) {
 # write to CSV
 write.csv(x=som_parameters_table, file="../output/som_parameters_table.csv")
 
+## %outbound percentages below different thresholds, to measure
+## marginal value of information
+
+print(paste("Temp-only for CO2:",round(length(which(prcout$`30`$t[,"co2"] < 0.25))/num_samples,4), "of samples below 25%outbound"))
+print(paste("Temp+CO2 for CO2:",round(length(which(prcout$`30`$ct[,"co2"] < 0.25))/num_samples,4), "of samples below 25%outbound"))
+
+print(paste("CO2-only for temp:",round(length(which(prcout$`30`$c[,"temp"] < 0.25))/num_samples,4), "of samples below 25%outbound"))
+print(paste("Temp+CO2 for temp:",round(length(which(prcout$`30`$ct[,"temp"] < 0.25))/num_samples,4), "of samples below 25%outbound"))
+
+
 ##==============================================================================
 
 
@@ -567,8 +581,8 @@ write.csv(x=som_parameters_table, file="../output/som_parameters_table.csv")
 
 age_of_interest <- seq(90,140,by=10)
 idx_of_interest <- match(age_of_interest, time)
-bb <- "40"
-dd <- "t"
+bb <- "50"
+dd <- "c"
 temp_of_interest <- apply(model_hindcast[[bb]][[dd]]$temp[idx_of_interest,], MARGIN=2, FUN=mean)
 
 ## correlations with the constant parameters
@@ -580,12 +594,17 @@ for (pp in 1:length(parnames_calib)) {
 }
 cor_mat <- cbind(1:57, cor_spearman, cor_pearson)
 
-print(cor_mat[rev(order(abs(cor_spearman))),])
+# only printing the correlations >= 0.10
+# ... yeah, "high correlation" in the variable name is pretty generous maybe
+#  but should catch anything we would want to look at more closely...
+idx_high_corr <- which( (abs(cor_spearman) >= 0.10) | (abs(cor_pearson) >= 0.10) )
+print(cor_mat[idx_high_corr[rev(order(abs(cor_spearman[idx_high_corr])))],])
+print(parnames_calib[idx_high_corr[rev(order(abs(cor_spearman[idx_high_corr])))]])
 
 
 ## correlations with the time series parameters
-bb <- "40"
-dd <- "t"
+bb <- "50"
+dd <- "c"
 mat_time <- t(par_time[[bb]][[dd]][,,1])
 for (pp in 2:n_parameters_time) {
   mat_time <- cbind(mat_time, t(par_time[[bb]][[dd]][,,pp]))
@@ -597,8 +616,9 @@ for (pp in 1:(n_parameters_time*n_time)) {
 }
 cor_mat_time <- cbind(1:(n_parameters_time*n_time), cor_spearman_time, cor_pearson_time)
 
+# only printing the 10 highest correlations of them
 tmp <- cor_mat_time[rev(order(abs(cor_spearman_time))),]
-print(tmp[1:30,])
+print(tmp[1:10,])
 
 ## find none of the time series quantities correlated with high temperatures
 ## with pearson or spearman corr higher than about 0.03-0.04

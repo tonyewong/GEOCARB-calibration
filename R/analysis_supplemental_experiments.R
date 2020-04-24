@@ -385,6 +385,55 @@ mtext(side=4, text="0.25*GYM and timing", line=1.2, cex=1.2)
 
 dev.off()
 
+
+##
+## Some calculations to report
+##
+
+# 49 is the timestep associated with age = 90 Myr ago, the peak of the temperature data
+idx_cret_supp <- which((model_hindcast_supp$`gym+timing`$temp[49,] >= windows$temp[49,"low"]) & (model_hindcast_supp$`gym+timing`$temp[49,] <= windows$temp[49,"high"]))
+idx_cret <- which((model_hindcast_supp$control$temp[49,] >= windows$temp[49,"low"]) & (model_hindcast_supp$control$temp[49,] <= windows$temp[49,"high"]))
+
+print("control:")
+print(quantile(par_calib_supp$control[,10], c(.025,.5,.975)))
+print("0.25GYM+timing:")
+print(quantile(par_calib_supp$`gym+timing`[,10], c(.025,.5,.975)))
+print("0.25GYM+timing, fits 90Myr ago temperature window:")
+print(quantile(par_calib_supp$`gym+timing`[idx_cret_supp,10], c(.025,.5,.975)))
+
+
+TODO HERE NOW MODIFYING THIS PLOT!
+
+idx_deltaT2X <- match("deltaT2X", parnames_calib)
+pdf_supp <- density(par_calib_supp$`gym+timing`[,idx_deltaT2X], from=1.5, to=10)
+pdf_supp_fit <- density(par_calib_supp$`gym+timing`[idx_cret_supp,idx_deltaT2X], from=1.5, to=10)
+pdf_ctrl <- density(par_calib_supp$control[,idx_deltaT2X], from=1.5, to=10)
+
+plot(pdf_supp$x, pdf_supp$y, type='l', col='steelblue', xlim=c(1.5,6), lty=3, lwd=2)
+lines(pdf_supp_fit$x, pdf_supp_fit$y, col='firebrick', lty=1, lwd=2)
+lines(pdf_ctrl$x, pdf_ctrl$y, col='black', lty=5, lwd=2)
+
+
+pdf('../figures/deltaT2X_distributions_supp.pdf',width=4,height=3, colormodel='cmyk', pointsize=11)
+par(mfrow=c(1,1), mai=c(.7,.3,.13,.15))
+plot(pdf_ctrl$x, pdf_ctrl$y, type='l', lwd=1.7, lty=5, xlim=c(1.5,6), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n', axes=FALSE, col="black")
+lines(pdf_supp$x, pdf_supp$y, lwd=1.7, lty=3, col="steelblue")
+lines(pdf_supp_fit$x, pdf_supp_fit$y, lwd=1.7, lty=1, col="firebrick")
+mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+mtext('Density', side=2, line=0.3)
+arrows(1, 0, 1, .85+offset, length=0.08, angle=30, code=2)
+axis(1, at=seq(0,10))
+minor.tick(nx=4, ny=0, tick.ratio=0.5)
+y0 <- 0.7*offset; arrows(x_5_95_thisstudy[1], y0, x_5_95_thisstudy[3], y0, lwd=1.5, length=0.04, angle=90, code=3, col="steelblue"); points(x_5_95_thisstudy[2], y0, pch=16, col="steelblue")
+#y1 <- 0.35*offset; arrows(x_5_95_royer2007[1], y1, x_5_95_royer2007[3], y1, lwd=1.5, length=0.04, angle=90, code=3); points(x_5_95_royer2007[2], y1, pch=15)
+y1 <- 0.3*offset; arrows(x_5_95_pr2011[1], y1, x_5_95_pr2011[3], y1, lwd=1.5, length=0.04, angle=90, code=3); points(x_5_95_pr2011[2], y1, pch=15)
+#y2 <- 0.08; arrows(x_5_95_ktc2017[1], y2, x_5_95_ktc2017[3], y2, length=0.04, angle=90, code=3); points(x_5_95_ktc2017[2], y2, pch=17)
+legend(5.1,1.02, c('5-95% range, PR2011','PR2011','5-95% range, this study','a posteriori, this study','a priori, both studies'),
+       pch=c(15,NA,16,NA,NA), lty=c(1,2,1,1,3), col=c("black","black","steelblue","steelblue","steelblue"), bty='n', lwd=1.7, cex=0.9)
+dev.off()
+
+
+
 ##
 ## End
 ##
