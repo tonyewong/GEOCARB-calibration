@@ -576,7 +576,7 @@ print(paste("Temp+CO2 for temp:",round(length(which(prcout$`30`$ct[,"temp"] < 0.
 
 ##==============================================================================
 ##
-## what variable is correlated to temperature at age = 100 Myr (or thereabouts)
+## what variables are correlated to temperature at age = 100 Myr (or thereabouts)
 ##
 
 age_of_interest <- seq(90,140,by=10)
@@ -623,6 +623,111 @@ print(tmp[1:10,])
 ## find none of the time series quantities correlated with high temperatures
 ## with pearson or spearman corr higher than about 0.03-0.04
 
+##==============================================================================
+
+
+
+##==============================================================================
+##
+## what variables are correlated to deltaT2X?
+##
+
+bb <- "30"
+dd <- "ct"
+
+## correlations with the constant parameters
+deltaT2X <- par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]], match("deltaT2X",parnames_calib)]
+mat <- par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]],]
+cor_spearman <- cor_pearson <- rep(NA, length(parnames_calib))
+for (pp in 1:length(parnames_calib)) {
+    cor_spearman[pp] <- cor(mat[,pp], deltaT2X,  method = "spearman")
+    cor_pearson[pp] <- cor(mat[,pp], deltaT2X,  method = "pearson")
+}
+cor_mat <- cbind(1:57, cor_spearman, cor_pearson)
+
+# only printing the correlations >= 0.10
+# ... yeah, "high correlation" in the variable name is pretty generous maybe
+#  but should catch anything we would want to look at more closely...
+idx_high_corr <- which( (abs(cor_spearman) >= 0.10) | (abs(cor_pearson) >= 0.10) )
+print(cor_mat[idx_high_corr[rev(order(abs(cor_spearman[idx_high_corr])))],])
+print(parnames_calib[idx_high_corr[rev(order(abs(cor_spearman[idx_high_corr])))]])
+
+
+## correlations with the time series parameters
+bb <- "30"
+dd <- "ct"
+mat_time <- t(par_time[[bb]][[dd]][,idx_sample[[bb]][[dd]],1])
+for (pp in 2:n_parameters_time) {
+  mat_time <- cbind(mat_time, t(par_time[[bb]][[dd]][,idx_sample[[bb]][[dd]],pp]))
+}
+cor_spearman_time <- cor_pearson_time <- rep(NA, n_parameters_time*n_time)
+for (pp in 1:(n_parameters_time*n_time)) {
+    cor_spearman_time[pp] <- cor(mat_time[,pp], deltaT2X,  method = "spearman")
+    cor_pearson_time[pp] <- cor(mat_time[,pp], deltaT2X,  method = "pearson")
+}
+cor_mat_time <- cbind(1:(n_parameters_time*n_time), cor_spearman_time, cor_pearson_time)
+
+# only printing the 10 highest correlations of them
+tmp <- cor_mat_time[rev(order(abs(cor_spearman_time))),]
+print(tmp[1:10,])
+
+## find no correlations higher than about 0.05
+
+##==============================================================================
+
+
+
+##==============================================================================
+##
+## time series parameters' autocorrelations, and uncertainties in ACF
+##
+
+bb <- "30"
+dd <- "ct"
+mat_time <- par_time[[bb]][[dd]][,idx_sample[[bb]][[dd]],]
+
+lag_max <- 20
+acf_time_full <- array(NA, dim = c(lag_max+1, num_samples, n_parameters_time))
+acf_time_quantiles <- array(NA, dim=c(lag_max+1, length(quantiles_i_want), n_parameters_time))
+
+for (pp in 1:n_parameters_time) {
+  for (ii in 1:num_samples) {
+    acf_time_full[,ii,pp] <- acf(mat_time[, ii, pp], plot=FALSE, lag.max=lag_max)$acf
+  }
+  # get quantiles
+  for (ll in 1:(lag_max+1)) {
+    acf_time_quantiles[ll,,pp] <- quantile(acf_time_full[ll,,pp], quantiles_i_want)
+  }
+}
+
+## make a plot
+
+lags <- 0:20
+
+plot_acf_time <- function() {
+    plot(lags, acf_time_quantiles[,5,pp], type='l', lwd=1.5, xlim=c(0,lag_max), ylim=c(-0.1,1), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+    polygon(c(lags,rev(lags)), c(acf_time_quantiles[,match("0.025", quantiles_i_want),pp], rev(acf_time_quantiles[,match("0.975", quantiles_i_want),pp])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+    lines(c(0,lag_max),c(0,0), lty=5)
+    grid()
+    mtext('Lag [# time steps]', side=1, line=2.5)
+    mtext('ACF', side=2, line=2.8)
+    axis(1, at=0:lag_max, labels=rep("",length=(lag_max+1)))
+    axis(1, at=c(1,5,10,15,20))
+    axis(2, at=seq(-0.1,1,by=0.1), las=1)
+    #text(0.25*lag_max, 0.8, parnames_time[pp], cex=1.1)
+    mtext(side=3, text=time_series_labels[pp], line=0, cex=1, adj=0)
+    mtext(side=3, text=parnames_time[pp], line=0, cex=1, adj=0.5)
+}
+
+pdf('../figures/time_series_autocorrelations.pdf',width=6,height=8,colormodel='cmyk', pointsize=11)
+par(mfrow=c(4,3), mai=c(0.45,.65,.25,.15))
+for (pp in 1:n_parameters_time) {
+    plot_acf_time()
+}
+dev.off()
+
+
+##==============================================================================
 
 ##
 ##

@@ -21,6 +21,10 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
+time_series_labels <- c(expression(bold('a')),expression(bold('b')),expression(bold('c')),expression(bold('d')),
+                        expression(bold('e')),expression(bold('f')),expression(bold('g')),expression(bold('h')),
+                        expression(bold('i')),expression(bold('j')),expression(bold('k')),expression(bold('l')))
+
 time_series_plot <- function() {
 
   bb <- "30"
@@ -38,6 +42,7 @@ time_series_plot <- function() {
   axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
   ticks=seq(from=ylims[1], to=ylims[2], by=dy)
   axis(2, at=ticks, labels=ticks, las=1)
+  mtext(side=3, text=time_series_labels[pp], line=0, cex=1, adj=0)
 
 }
 
