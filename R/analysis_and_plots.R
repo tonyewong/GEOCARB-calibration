@@ -726,15 +726,42 @@ for (pp in 1:n_parameters_time) {
 }
 dev.off()
 
-
 ##==============================================================================
 
-##
-##
-##
 
 
 ##==============================================================================
+##
+## CO2 windows and proxy data points
+##
+
+# don't want to plot proxy windows for time periods without data
+idx_no_data <- which(windows$co2[,"low"]==0 | windows$co2[,"high"]==50000)
+idx_data <- setdiff(1:n_time, idx_no_data)
+ifirst <- idx_data[1]
+idx_data <- c(ifirst-1, idx_data) # start time series 1 earlier for continuity in the figure
+
+pdf('../figures/co2_windows_and_proxies.pdf',width=4,height=3.5,colormodel='cmyk', pointsize=11)
+
+par(mfrow=c(1,1), mai=c(0.6,.9,.18,.15))
+plot(-data_calib$age, log10(data_calib$co2), pch='x', cex=0.65, xlim=c(-425,0), ylim=c(-0.3,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+grid()
+polygon(-c(time[idx_data],rev(time[idx_data])), log10(c(windows$co2[idx_data,"high"],rev(windows$co2[idx_data,"low"]))), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+points(-data_calib$age, log10(data_calib$co2), pch='x', cex=0.65)
+mtext('Time [Myr ago]', side=1, line=2.1)
+mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.5)
+axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
+ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,100000,10000)))
+axis(2, at=ticks, labels=rep('',length(ticks)))
+axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1)
+#axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
+legend(-420, 0.4, c('Fitted precalibration windows','Data points from Foster et al [2017]'), pch=c(15,4), col=c(rgb(.5,.5,.5,.5),'black'), pt.cex=1.2, cex=.6, bty='n', y.intersp=1)
+
+dev.off()
+
+##==============================================================================
+
+
 
 
 ##==============================================================================
