@@ -741,7 +741,7 @@ idx_data <- setdiff(1:n_time, idx_no_data)
 ifirst <- idx_data[1]
 idx_data <- c(ifirst-1, idx_data) # start time series 1 earlier for continuity in the figure
 
-pdf('../figures/co2_windows_and_proxies.pdf',width=4,height=3.5,colormodel='cmyk', pointsize=11)
+pdf('../figures/co2_windows_and_proxies.pdf',width=4,height=3,colormodel='cmyk', pointsize=11)
 
 par(mfrow=c(1,1), mai=c(0.6,.9,.18,.15))
 plot(-data_calib$age, log10(data_calib$co2), pch='x', cex=0.65, xlim=c(-425,0), ylim=c(-0.3,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
