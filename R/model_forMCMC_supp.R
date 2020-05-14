@@ -47,7 +47,7 @@ model_forMCMC_supp <- function(par_calib, par_time, par_fixed, parnames_calib,
                           ind_const_calib, ind_time_calib,
                           ind_const_fixed, ind_time_fixed,
                           ind_expected_time, ind_expected_const,
-                          iteration_threshold, supp_experiment_parameters=c(130,80,1)) {
+                          iteration_threshold, supp_experiment_parameters=c(130,80,1,1)) {
 
   # here, we are assuming that we will calibrate all of the parameters
   # par_calib = a vector of all of the constant parameters

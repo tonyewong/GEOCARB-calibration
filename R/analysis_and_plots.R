@@ -193,7 +193,6 @@ for (bb in prc_outbound) {
 
 source("getData.R")
 source("constraints.R")
-windows$temp_sol <- windows$temp + array(rep(7.4*time/570,2), dim=c(58,2))
 
 # pick which simulation set to display
 bb <- "30"

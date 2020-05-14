@@ -7,15 +7,19 @@
 
 source("model_forMCMC_supp.R")
 source("run_geocarb_suppF.R")
+source("constraints.R")
 
 ##
 ## read the parameters from the set of supplemental experiments
 ## -- compare against par_calib$`50`$ct, the control
 ##
 
-supp_names <- c("control", "gym", "timing", "gym+timing")
+supp_names <- c("control", "gym", "timing", "gym+timing","dT2X")
 par_calib_supp <- par_quantiles_supp <- par_time_supp <- par_time_quantiles_supp <- prcout_supp <- vector("list", length(supp_names))
 names(par_calib_supp) <- names(par_quantiles_supp) <- names(par_time_supp) <- names(par_time_quantiles_supp) <- names(prcout_supp) <- supp_names
+
+num_samples <- 10000
+quantiles_i_want <- c(0, 0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975, 1)
 
 # control
 appen <- supp_names[1]
@@ -113,6 +117,31 @@ for (pp in 1:dim(par_time_supp[[appen]])[3]) {
     }
 }
 
+# 1.5x deltaT2X-only
+appen <- supp_names[5]
+# -- get parameters
+load(paste("../output/lhs_param_ct_out50_",appen,".RData", sep=""))
+par_calib_supp[[appen]] <- cbind(par_calib_save, rep(0,nrow(par_calib_save)))
+colnames(par_calib_supp[[appen]]) <- c(colnames(par_calib_save), "deltaT2Xglac")
+par_time_supp[[appen]] <- par_time_save
+# -- quantiles for the constant parameters
+par_quantiles_supp[[appen]] <- mat.or.vec(nr=ncol(par_calib_supp[[appen]])+1, nc=length(quantiles_i_want))
+rownames(par_quantiles_supp[[appen]]) <- c(colnames(par_calib_supp[[appen]]), "deltaT2Xglac")
+colnames(par_quantiles_supp[[appen]]) <- as.character(quantiles_i_want)
+for (pp in 1:ncol(par_calib_supp[[appen]])) {
+    par_quantiles_supp[[appen]][pp,] <- quantile(par_calib_supp[[appen]][,pp], quantiles_i_want)
+}
+par_calib_supp[[appen]][,"deltaT2Xglac"] <- par_calib_supp[[appen]][,"deltaT2X"]*par_calib_supp[[appen]][,"GLAC"]
+par_quantiles_supp[[appen]]["deltaT2Xglac",] <- quantile(par_calib_supp[[appen]][,"deltaT2Xglac"], quantiles_i_want)
+# -- quantiles for the time-varying parameters
+par_time_quantiles_supp[[appen]] <- array(NA, dim=c(dim(par_time_supp[[appen]])[1],length(quantiles_i_want),dim(par_time_supp[[appen]])[3]), dimnames=list(1:n_time, quantiles_i_want, parnames_time))
+for (pp in 1:dim(par_time_supp[[appen]])[3]) {
+    for (tt in 1:dim(par_time_supp[[appen]])[1]) {
+        par_time_quantiles_supp[[appen]][tt,,pp] <- quantile(par_time_supp[[appen]][tt,,pp], quantiles_i_want)
+    }
+}
+
+
 
 ##
 ## run hindcasts
@@ -125,10 +154,11 @@ for (ee in supp_names) {
   model_hindcast_supp[[ee]] <- vector('list', 2)
   names(model_hindcast_supp[[ee]]) <- c("co2","temp")
   model_hindcast_supp[[ee]]$co2 <- model_hindcast_supp[[ee]]$temp <- mat.or.vec(nr=58, nc=num_samples)
-  if (ee=="control") {supp_experiment_parameters=c(130,80,1)
-  } else if (ee=="gym") {supp_experiment_parameters=c(130,80,0.25)
-  } else if (ee=="timing") {supp_experiment_parameters=c(110,60,1)
-  } else if (ee=="gym+timing") {supp_experiment_parameters=c(110,60,0.25)
+  if (ee=="control") {supp_experiment_parameters=c(130,80,1,1)
+  } else if (ee=="gym") {supp_experiment_parameters=c(130,80,0.25,1)
+  } else if (ee=="timing") {supp_experiment_parameters=c(110,60,1,1)
+  } else if (ee=="gym+timing") {supp_experiment_parameters=c(110,60,0.25,1)
+  } else if (ee=="dT2X") {supp_experiment_parameters=c(130,80,1,1.5)
   } else {print("ERROR")}
   prcout_supp[[ee]] <- mat.or.vec(nr=num_samples, nc=2)
   colnames(prcout_supp[[ee]]) <- c("co2","temp")
@@ -196,6 +226,7 @@ plot(prcout_supp_sorted$control[,"temp"], log10(1-ecdf_values), type="l", ylim=c
 lines(prcout_supp_sorted$`gym`[,"temp"], log10(1-ecdf_values), col='blue')
 lines(prcout_supp_sorted$`timing`[,"temp"], log10(1-ecdf_values), col='red')
 lines(prcout_supp_sorted$`gym+timing`[,"temp"], log10(1-ecdf_values), col='purple')
+lines(prcout_supp_sorted$`dT2X`[,"temp"], log10(1-ecdf_values), col='purple')
 
 
 ##

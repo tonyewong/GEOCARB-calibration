@@ -8,7 +8,7 @@
 
 !---------------------------------------------------------------------------------
 subroutine run_geocarb_supp(Matrix_56, Matrix_12, age_gym_ang_beg, age_gym_ang_end, &
-                            gym_fac, age, ageN, iteration_threshold, CO2_out, O2_out, temp_out)
+                            gym_fac, dT2X_fac, age, ageN, iteration_threshold, CO2_out, O2_out, temp_out)
 !  ===============================================================================
 ! | Inputs:
 ! |    Variables:
@@ -16,6 +16,7 @@ subroutine run_geocarb_supp(Matrix_56, Matrix_12, age_gym_ang_beg, age_gym_ang_e
 ! |     Matrix_12   12 time-varying parameters, each of length ageN
 ! |     age_gym_ang_beg    beginning age (Myr ago) for gymnosperm-angiosperm transition
 ! |     age_gym_ang_end    ending age (Myr ago) for gymnosperm-angiosperm transition
+! |     dT2X_fac           multiplicative factor by which to modulate deltaT2X near the GYM-ANG transition period
 ! |     gym_fac            multiplicative factor by which to modulate GYM during the GYM-ANG transition period
 ! |
 ! |    Parameters:
@@ -44,6 +45,7 @@ real(DP), dimension(56), intent(IN) :: Matrix_56      ! 56 constant parameters t
 real(DP), dimension(58,ageN), intent(IN) :: Matrix_12 ! 12 time-series parameters to be evaluated, each of length ageN
 real(DP), intent(IN) :: age_gym_ang_beg               ! beginning age (Myr ago) for gymnosperm-angiosperm transition
 real(DP), intent(IN) :: age_gym_ang_end               ! ending age (Myr ago) for gymnosperm-angiosperm transition
+real(DP), intent(IN) :: dT2X_fac                      ! multiplicative factor by which to modulate deltaT2X around the GYM-ANG transition period
 real(DP), intent(IN) :: gym_fac                       ! multiplicative factor by which to modulate GYM during the GYM-ANG transition period
 
 ! explicit output
@@ -309,6 +311,8 @@ Rca = Rca_570
         failed_run = .FALSE.
         t = age(i) !age of time-step, in Myrs ago
 
+
+
         ! calculate factors that are influenced by glacial vs. non-glacial state ("GCM")
         ! for glacial periods between 260 and 330 Myrs ago and between 35 and 0 Myrs ago;
         ! BASIC code calls for a 270-340 Myrs ago interval, but see Fielding et al 2008
@@ -317,8 +321,12 @@ Rca = Rca_570
             GCM = GLAC*deltaT2X/log(2.0) !in GEOCARBSULF, deltaT2X = GCM*ln(2); called capital gamma in Berner (2004)
 !!!            111 PRINT *, "GCM is: ", GCM
         else
-            GCM = deltaT2X/log(2.0)
-!!!            112 PRINT *, "GCM is: ", GCM
+            !sensitivity experiment
+            if ((t .le. 110.0) .AND. (t .ge. 60.0)) then
+              GCM = dT2X_fac*deltaT2X/log(2.0)
+            else
+              GCM = deltaT2X/log(2.0)
+            end if
         end if
 
         ! calculate factors related to vegetation type

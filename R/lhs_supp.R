@@ -29,8 +29,9 @@ filename.calibinput <- '../input_data/GEOCARB_input_summaries_calib_all.csv'
 data_appen <- ""
 if (use_co2) {data_appen <- paste(data_appen,"c",sep="")}
 if (use_temperature) {data_appen <- paste(data_appen,"t",sep="")}
-filename.covarout <- paste('../output/lhs_covar_',data_appen,'_out',prcout_threshold*100,'.RData',sep='')
-filename.paramout <- paste('../output/lhs_param_',data_appen,'_out',prcout_threshold*100,'.RData',sep='')
+if (!exists("appen")) {appen <- ""}
+filename.covarout <- paste('../output/lhs_covar_',data_appen,'_out',prcout_threshold*100,'_',appen,'.RData',sep='')
+filename.paramout <- paste('../output/lhs_param_',data_appen,'_out',prcout_threshold*100,'_',appen,'.RData',sep='')
 
 source("model_setup.R")
 source('run_geocarb_suppF.R')

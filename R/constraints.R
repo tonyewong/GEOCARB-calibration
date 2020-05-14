@@ -84,6 +84,8 @@ windows_temp <- cbind(temp_lower, temp_upper)
 idx_temp <- match(-age, data_temps[,"time"])
 windows_temp <- windows_temp[idx_temp,]
 windows$temp[,c("low","high")] <- windows_temp
+windows$temp_sol <- windows$temp + array(rep(7.4*time/570,2), dim=c(58,2))
+
 ##==============================================================================
 
 
