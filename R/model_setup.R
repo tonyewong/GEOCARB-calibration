@@ -109,6 +109,28 @@ for (i in 1:length(parnames_const_calib)) {
 
 rm(list=c('bound_lower','bound_upper','bounds'))
 
+
+##==============================================================================
+model_out <- model_forMCMC( par_calib=par_calib0,
+                            par_time=par_time_center,
+                            par_fixed=par_fixed0,
+                            parnames_calib=parnames_const_calib,
+                            parnames_fixed=parnames_const_fixed,
+                            parnames_time=parnames_time_calib,
+                            age=age,
+                            ageN=ageN,
+                            ind_const_calib=ind_const_calib,
+                            ind_time_calib=ind_time_calib,
+                            ind_const_fixed=ind_const_fixed,
+                            ind_time_fixed=ind_time_fixed,
+                            ind_expected_time=ind_expected_time,
+                            ind_expected_const=ind_expected_const,
+                            iteration_threshold=iteration_threshold)
+n_time <- length(model_out[,"co2"])
+time <- model_out[,1]
+##==============================================================================
+
+
 ##==============================================================================
 ## End
 ##==============================================================================

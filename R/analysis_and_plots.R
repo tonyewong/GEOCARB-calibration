@@ -54,7 +54,8 @@ data_choice <- 'F2017'    # Which data set?  PR2011 = Park and Royer (2011), or 
 fSR_choice <- 'DT2019'     # Which fSR time series? ("PR2011", "LENTON", "DT2019")
 filename.data <- '../input_data/CO2_Proxy_Foster2017_calib_SN-co2_25Sep2018.csv'
 source("model_setup.R")
-n_time <- nrow(par_time_center)
+source("percent_outbound.R")
+source("constraints.R")
 
 num_samples <- 10000
 quantiles_i_want <- c(0, 0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975, 1)
@@ -116,13 +117,7 @@ for (bb in prc_outbound) {
 
 ##
 ## run ensemble with the 30-both parameters
-## --> will need to read the time series parameters from lhs_covar_ct_out30.RData
 ##
-
-#load("../output/lhs_covar_ct_out30.RData")  #> dim(par_covar_save)  [1]    58    58 10000    12
-## make sure the samples are concomitant with the constant parameters
-#par_covar <- par_covar_save[,,idx_sample$`30`$`ct`,]
-#rm(list=c("par_covar_save")) # to save ram
 
 ## run hindcasts
 
@@ -139,7 +134,7 @@ for (bb in prc_outbound) {
         colnames(prcout[[bb]][[dd]]) <- c("co2","temp")
         model_hindcast[[bb]][[dd]]$co2 <- model_hindcast[[bb]][[dd]]$temp <- mat.or.vec(nr=58, nc=num_samples)
         for (ii in 1:num_samples) {
-            model_out<- model_forMCMC(par_calib=par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]][ii],],
+            model_out <- model_forMCMC(par_calib=par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]][ii],],
                                        par_time=par_time[[bb]][[dd]][,idx_sample[[bb]][[dd]][ii],],
                                        par_fixed=par_const_fixed0,
                                        parnames_calib=parnames_const_calib,
@@ -162,7 +157,6 @@ for (bb in prc_outbound) {
         }
     }
 }
-time <- model_out[,1]
 
 ## compute model quantiles for plotting against proxy data, for each experiment
 
@@ -190,9 +184,6 @@ for (bb in prc_outbound) {
 ##
 ## make a plot of the hindcasts relative to proxy data
 ##
-
-source("getData.R")
-source("constraints.R")
 
 # pick which simulation set to display
 bb <- "30"
@@ -336,6 +327,7 @@ y1 <- 0.3*offset; arrows(x_5_95_pr2011[1], y1, x_5_95_pr2011[3], y1, lwd=1.5, le
 legend(5.1,1.02, c('5-95% range, PR2011','PR2011','5-95% range, this study','a posteriori, this study','a priori, both studies'),
        pch=c(15,NA,16,NA,NA), lty=c(1,2,1,1,3), col=c("black","black","steelblue","steelblue","steelblue"), bty='n', lwd=1.7, cex=0.9)
 dev.off()
+
 ##==============================================================================
 
 
@@ -402,7 +394,7 @@ nn_test <- seq(1000,10000,1000)
 yvals <- c()
 for (nn in nn_test) {
     tmp_sample <- par_calib[[bb]][[dd]][1:nn,"deltaT2X"]
-    tmp <- quantile(tmp_sample, c(0.25,0.75,0.05,0.95,0.5))
+    tmp <- quantile(tmp_sample, c(0.25,0.75,0.025,0.975,0.5))
     polygon(c(tmp[3:4], rev(tmp[3:4])), c(rep(y0,2),rep(y0+width,2)), lwd=1, col=rgb(.5,.5,.5,alphas[1]))
     polygon(c(tmp[1:2], rev(tmp[1:2])), c(rep(y0,2),rep(y0+width,2)), lwd=1, col=rgb(.5,.5,.5,alphas[2]))
     lines(c(tmp[5],tmp[5]), c(y0,y0+width), type='l', lwd=2)
@@ -474,7 +466,7 @@ pp <- 6; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
 pp <- 7; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
 pp <- 8; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
 pp <- 9; ylims <- c(0,.12); dy <- 0.02; units <- "[1/K]"; time_series_plot()
-pp <- 10; ylims <- c(-6,8); dy <- 2; units <- expression("["*degree*"C]"); time_series_plot()
+pp <- 10; ylims <- c(-6,8); dy <- 2; units <- "[deg C]"; time_series_plot()
 pp <- 11; ylims <- c(0,4); dy <- 1; units <- "[unitless]"; time_series_plot()
 pp <- 12; ylims <- c(0,2); dy <- 0.5; units <- "[unitless]"; time_series_plot()
 
@@ -672,6 +664,10 @@ print(tmp[1:10,])
 
 ## find no correlations higher than about 0.05
 
+## highest magnitude correlation is with idx = 583, which is the 3rd timestep
+## of the 11th time series (fSR, seafloor spreading rate/degassing). There is no
+## data at that time, so this correlation seems spurious
+
 ##==============================================================================
 
 
@@ -760,6 +756,75 @@ dev.off()
 
 ##==============================================================================
 
+
+
+##==============================================================================
+##
+## CO2 concentration vs uncertainty range
+##
+
+pdf('../figures/co2_and_uncertainties.pdf',width=4,height=3.8,colormodel='cmyk', pointsize=11)
+par(mfrow=c(1,1), mai=c(0.7,.9,.25,.25))
+plot(data_calib$co2, data_calib$co2_high-data_calib$co2_low, pch=16, cex=0.65, xlim=c(0,4000), ylim=c(0,6000), xlab='', ylab='', xaxs='i', yaxs='i')
+grid()
+mtext(expression('CO'[2]*' concentration [ppmv]'), side=1, line=2.5)
+mtext(expression('width of +/-1'*sigma*' CO'[2]*' range [ppmv]'), side=2, line=2.5)
+dev.off()
+
+##==============================================================================
+
+
+## now, run the supplemental/sensitivity experiment analysis
+
+source("analysis_supplemental_experiments.R")
+
+
+##==============================================================================
+##
+## supp figure for deltaT2X distributions, extended to include the glacial
+## periods and the sensitivity experiment
+##
+
+# experiment you want
+bb <- "50"  # to match the sensitivity experiment
+dd <- "ct"
+
+# density of deltaT2X from this work
+parnames_calib <- colnames(par_calib[[bb]][[dd]])
+ics <- match('deltaT2X', parnames_calib)
+deltaT2X_density <- density(par_calib[[bb]][[dd]][,ics], from=0, to=10)
+
+iglac <- match('GLAC', parnames_calib)
+glac_density <- density(par_calib[[bb]][[dd]][,iglac], from=1, to=5)
+
+icsg <- match('deltaT2Xglac', parnames_calib)
+deltaT2Xglac_density <- density(par_calib[[bb]][[dd]][,icsg], from=0, to=25)
+
+offset <- 0.08
+
+pdf('../figures/deltaT2X_distributions_withGlac.pdf',width=6,height=4, colormodel='cmyk', pointsize=11)
+par(mfrow=c(1,1), mai=c(.7,.3,.13,.15))
+plot(deltaT2X_density$x, deltaT2X_density$y + offset, type='l', lwd=1.7, xlim=c(0.8,15), ylim=c(0,.61+offset),
+     xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n', axes=FALSE, col='steelblue')
+lines(pdf_supp$x, pdf_supp$y + offset, lwd=1.7, lty=5, col='seagreen3')
+lines(c(10,20), c(offset,offset), lty=1, lwd=1.7)
+lines(deltaT2Xglac_density$x, offset+deltaT2Xglac_density$y, lwd=1.7, lty=4, col='salmon3')
+lines(pdf_supp_glac$x, pdf_supp_glac$y + offset, lwd=1.7, lty=4, col='seagreen3')
+mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.4)
+mtext('Density', side=2, line=0.3)
+arrows(1, 0, 1, .58+offset, length=0.08, angle=30, code=2)
+axis(1, at=seq(0,20,1), labels=rep('',21), col='gray')
+axis(1, at=seq(0,20,5), labels=c('0','5','10','15','20'), cex.axis=1)
+y0 <- 0.2*offset; arrows(x_5_95_thisstudy[1], y0, x_5_95_thisstudy[3], y0, length=0.05, angle=90, code=3, lwd=1.5, col='steelblue'); points(x_5_95_thisstudy[2], y0, pch=16, col='steelblue')
+y3 <- 0.8*offset; arrows(x_5_95_glac[1], y3, x_5_95_glac[3], y3, length=0.05, angle=90, code=3, lwd=1.5, lty=4, col='salmon3'); points(x_5_95_glac[2], y3, pch=1, col='salmon3')
+y2 <- 0.5*offset; arrows(x_ktc2017[1], y2, x_ktc2017[3], y2, length=0.05, angle=90, lwd=1.5, code=3); points(x_ktc2017[2], y2, pch=17)
+legend(5.7,0.67, c('5-95% range, Krissansen-Totton & Catling (2017)','5-95% range, this study',
+                  '5-95% range (glacial), this study', 'Posterior, this study','Posterior (0.25*GYM+timing), this study',
+                  'Posterior (glacial), this study', 'Posterior (glacial, 0.25*GYM+timing), this study'), pch=c(17,16,1,NA,NA,NA,NA), lty=c(1,1,3,1,5,4,4), cex=.9, bty='n', lwd=1.5,
+       col=c('black','steelblue','salmon3','steelblue','seagreen3','salmon3','seagreen3'))
+dev.off()
+
+##==============================================================================
 
 
 

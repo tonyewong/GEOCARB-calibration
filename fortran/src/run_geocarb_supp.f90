@@ -16,8 +16,8 @@ subroutine run_geocarb_supp(Matrix_56, Matrix_12, age_gym_ang_beg, age_gym_ang_e
 ! |     Matrix_12   12 time-varying parameters, each of length ageN
 ! |     age_gym_ang_beg    beginning age (Myr ago) for gymnosperm-angiosperm transition
 ! |     age_gym_ang_end    ending age (Myr ago) for gymnosperm-angiosperm transition
-! |     dT2X_fac           multiplicative factor by which to modulate deltaT2X near the GYM-ANG transition period
 ! |     gym_fac            multiplicative factor by which to modulate GYM during the GYM-ANG transition period
+! |     dT2X_fac           multiplicative factor by which to modulate deltaT2X near the GYM-ANG transition period
 ! |
 ! |    Parameters:
 ! |     age         age of time-step, in millions of years ago; 0-570 Ma
@@ -45,7 +45,7 @@ real(DP), dimension(56), intent(IN) :: Matrix_56      ! 56 constant parameters t
 real(DP), dimension(58,ageN), intent(IN) :: Matrix_12 ! 12 time-series parameters to be evaluated, each of length ageN
 real(DP), intent(IN) :: age_gym_ang_beg               ! beginning age (Myr ago) for gymnosperm-angiosperm transition
 real(DP), intent(IN) :: age_gym_ang_end               ! ending age (Myr ago) for gymnosperm-angiosperm transition
-real(DP), intent(IN) :: dT2X_fac                      ! multiplicative factor by which to modulate deltaT2X around the GYM-ANG transition period
+real(DP), intent(INOUT) :: dT2X_fac                      ! multiplicative factor by which to modulate deltaT2X around the GYM-ANG transition period
 real(DP), intent(IN) :: gym_fac                       ! multiplicative factor by which to modulate GYM during the GYM-ANG transition period
 
 ! explicit output
@@ -322,8 +322,15 @@ Rca = Rca_570
 !!!            111 PRINT *, "GCM is: ", GCM
         else
             !sensitivity experiment
-            if ((t .le. 110.0) .AND. (t .ge. 60.0)) then
-              GCM = dT2X_fac*deltaT2X/log(2.0)
+            if ((t .le. 130.0) .AND. (t .gt. 40.0)) then
+              if (dT2X_fac .lt. 0.0) then
+                ! don't do the sensitivity experiment
+                GCM = deltaT2X/log(2.0)
+              else
+                ! do the sensitivity experiment, linearly increase deltaT2X from non-glacial to glacial value
+                dT2X_fac = ((GLAC*(130.0-t)) + (t-40))/90.0
+                GCM = dT2X_fac*deltaT2X/log(2.0)
+              end if
             else
               GCM = deltaT2X/log(2.0)
             end if
