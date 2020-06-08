@@ -821,7 +821,39 @@ y2 <- 0.5*offset; arrows(x_ktc2017[1], y2, x_ktc2017[3], y2, length=0.05, angle=
 legend(5.7,0.67, c('5-95% range, Krissansen-Totton & Catling (2017)','5-95% range, this study',
                   '5-95% range (glacial), this study', 'Posterior, this study','Posterior (0.25*GYM+timing), this study',
                   'Posterior (glacial), this study', 'Posterior (glacial, 0.25*GYM+timing), this study'), pch=c(17,16,1,NA,NA,NA,NA), lty=c(1,1,3,1,5,4,4), cex=.9, bty='n', lwd=1.5,
-       col=c('black','steelblue','salmon3','steelblue','seagreen3','salmon3','seagreen3'))
+                  col=c('black','steelblue','salmon3','steelblue','seagreen3','salmon3','seagreen3'))
+dev.off()
+
+##==============================================================================
+
+
+
+##==============================================================================
+## GYM experiment modification
+##============================
+
+ii <- 1
+idx_life <- match("LIFE",parnames_calib); idx_gym <- match("GYM",parnames_calib)
+GYM <- 0.875; LIFE <- 0.25
+#GYM <- par_calib$`30`$ct[ii,idx_gym]; LIFE <- par_calib$`30`$ct[ii,idx_life]
+
+ages_gym <- c(570 , 380 , 350, 130, 80, 0)
+fE <-       c(LIFE, LIFE, GYM, GYM, 1 , 1)
+ages_gym_mod <- c(570 , 380 , 350, 110, 110     , 60, 60, 0)
+fE_mod <-       c(LIFE, LIFE, GYM, GYM, 0.25*GYM,  1,  1, 1)
+
+pdf('../figures/gym_modification.pdf',width=4,height=3, colormodel='cmyk', pointsize=11)
+par(mfrow=c(1,1), mai=c(.7,.8,.13,.15))
+plot(-ages_gym, fE, type='l', xlim=c(-570, 0), ylim=c(0,1.1), xaxt='n', yaxt='n', xlab='', ylab='', xaxs='i', yaxs='i')
+grid()
+lines(-ages_gym_mod, fE_mod, col="firebrick", lty=5)
+lines(-ages_gym, fE, col="black", lty=1)
+axis(1, at=seq(-500,0,100), labels=c(500,400,300,200,100,0))
+axis(2, at=seq(from=0, to=1, by=0.25), labels=c("0","0.25","0.5","0.75","1"), las=1)
+mtext("Age [Myr ago]", side=1, line=2.4)
+mtext("fE [unitless]", side=2, line=3)
+legend(-570,1.12, c('Original default values', '0.25*GYM+timing'), lty=c(1,5),
+       cex=.9, bty='n', lwd=1.5, col=c('black','firebrick'))
 dev.off()
 
 ##==============================================================================
