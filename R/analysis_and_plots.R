@@ -308,11 +308,8 @@ offset <- 0.1
 
 pdf('../figures/deltaT2X_distributions.pdf',width=4,height=3, colormodel='cmyk', pointsize=11)
 par(mfrow=c(1,1), mai=c(.7,.3,.13,.15))
-plot(deltaT2X_density$x, deltaT2X_density$y + offset, type='l', lwd=1.7, xlim=c(0.9,10.1), ylim=c(0,.9+offset),
+plot(deltaT2X_density$x, deltaT2X_density$y + offset, type='l', lwd=1.7, xlim=c(0.85,10.1), ylim=c(0,.9+offset),
      xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n', axes=FALSE, col="steelblue")
-#polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]][,'q025'],rev(model_quantiles[,'q975'])), col='aquamarine1', border=NA)
-#polygon(-c(time,rev(time)), c(model_quantiles[,'q05'],rev(model_quantiles[,'q95'])), col='aquamarine3', border=NA)
-#lines(deltaT2X_density_nm$x, deltaT2X_density_nm$y + offset, lwd=2, lty=3)
 lines(deltaT2X_density_pr2011$x, deltaT2X_density_pr2011$y + offset, lwd=1.7, lty=2)
 lines(x_cs, f_cs + offset, lwd=1.7, lty=3, col="steelblue")
 mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
@@ -321,11 +318,10 @@ arrows(1, 0, 1, .85+offset, length=0.08, angle=30, code=2)
 axis(1, at=seq(0,10))
 minor.tick(nx=4, ny=0, tick.ratio=0.5)
 y0 <- 0.7*offset; arrows(x_5_95_thisstudy[1], y0, x_5_95_thisstudy[3], y0, lwd=1.5, length=0.04, angle=90, code=3, col="steelblue"); points(x_5_95_thisstudy[2], y0, pch=16, col="steelblue")
-#y1 <- 0.35*offset; arrows(x_5_95_royer2007[1], y1, x_5_95_royer2007[3], y1, lwd=1.5, length=0.04, angle=90, code=3); points(x_5_95_royer2007[2], y1, pch=15)
 y1 <- 0.3*offset; arrows(x_5_95_pr2011[1], y1, x_5_95_pr2011[3], y1, lwd=1.5, length=0.04, angle=90, code=3); points(x_5_95_pr2011[2], y1, pch=15)
-#y2 <- 0.08; arrows(x_5_95_ktc2017[1], y2, x_5_95_ktc2017[3], y2, length=0.04, angle=90, code=3); points(x_5_95_ktc2017[2], y2, pch=17)
-legend(5.1,1.02, c('5-95% range, PR2011','PR2011','5-95% range, this study','a posteriori, this study','a priori, both studies'),
-       pch=c(15,NA,16,NA,NA), lty=c(1,2,1,1,3), col=c("black","black","steelblue","steelblue","steelblue"), bty='n', lwd=1.7, cex=0.9)
+xlegend <- c(5.2,5.85); ylegend <- 0.94; arrows(xlegend[1], ylegend, xlegend[2], ylegend, lwd=1.5, length=0.04, angle=90, code=3, col="black"); points(mean(xlegend), ylegend, pch=15, col="black", cex=0.85)
+xlegend <- c(5.2,5.85); ylegend <- 0.79; arrows(xlegend[1], ylegend, xlegend[2], ylegend, lwd=1.5, length=0.04, angle=90, code=3, col="steelblue"); points(mean(xlegend), ylegend, pch=16, col="steelblue", cex=0.85)
+legend(4.9,1.02, c('5-95% range, PR2011','PR2011','5-95% range, this study','a posteriori, this study','a priori, both studies'), lty=c(NA,2,NA,1,3), col=c("black","black","steelblue","steelblue","steelblue"), bty='n', lwd=1.7, cex=0.9)
 dev.off()
 
 ##==============================================================================
