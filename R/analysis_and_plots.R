@@ -312,7 +312,8 @@ plot(deltaT2X_density$x, deltaT2X_density$y + offset, type='l', lwd=1.7, xlim=c(
      xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n', axes=FALSE, col="steelblue")
 lines(deltaT2X_density_pr2011$x, deltaT2X_density_pr2011$y + offset, lwd=1.7, lty=2)
 lines(x_cs, f_cs + offset, lwd=1.7, lty=3, col="steelblue")
-mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+#mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+mtext(expression("S ["*degree*"C]"), side=1, line=2.3)
 mtext('Density', side=2, line=0.3)
 arrows(1, 0, 1, .85+offset, length=0.08, angle=30, code=2)
 axis(1, at=seq(0,10))
@@ -359,12 +360,14 @@ for (dd in rev(data_sets)) {
     }
     y0 <- y0+2*offset
 }
-mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+#mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+mtext(expression("S ["*degree*"C]"), side=1, line=2.3)
 minor.tick(ny=0)
 mtext(expression('CO'[2]), side=2, line=.3, adj=0.87)
 mtext("T", side=2, line=.5, adj=0.5)
 mtext(expression("CO"[2]*" & T"), side=2, line=.3, adj=0.1)
 dev.off()
+
 ##==============================================================================
 
 
@@ -397,7 +400,8 @@ for (nn in nn_test) {
     yvals <- c(yvals, y0+0.5*width)
     y0 <- y0+width+offset
 }
-mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+#mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.3)
+mtext(expression("S ["*degree*"C]"), side=1, line=2.3)
 mtext("Sample size", side=2, line=3.3)
 axis(side=2, at=yvals, labels=nn_test[1:length(yvals)], las=1)
 minor.tick(ny=0)
@@ -806,7 +810,8 @@ lines(pdf_supp$x, pdf_supp$y + offset, lwd=1.7, lty=5, col='seagreen3')
 lines(c(10,20), c(offset,offset), lty=1, lwd=1.7)
 lines(deltaT2Xglac_density$x, offset+deltaT2Xglac_density$y, lwd=1.7, lty=4, col='salmon3')
 lines(pdf_supp_glac$x, pdf_supp_glac$y + offset, lwd=1.7, lty=4, col='seagreen3')
-mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.4)
+#mtext(expression(Delta*"T(2x) ["*degree*"C]"), side=1, line=2.4)
+mtext(expression("S ["*degree*"C]"), side=1, line=2.4)
 mtext('Density', side=2, line=0.3)
 arrows(1, 0, 1, .58+offset, length=0.08, angle=30, code=2)
 axis(1, at=seq(0,20,1), labels=rep('',21), col='gray')
