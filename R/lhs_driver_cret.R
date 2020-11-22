@@ -50,7 +50,7 @@ if(Sys.info()['user']=='tony') {
 #n_sample <- 20000000
 n_sample <- 100000
 n_sample_per_chunk <- 10000 # maximum number of time series samples to consider at once
-n_sample_min <- 10000 # minimum number of samples we'd be happy with; stop after this to avoid overrunning RAM
+n_sample_min <- 100 # minimum number of samples we'd be happy with; stop after this to avoid overrunning RAM
 # if you don't want to use this, just set it greater than n_sample
 n_node <- 1 # distribute the chunks across multiple nodes?
 

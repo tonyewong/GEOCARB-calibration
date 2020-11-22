@@ -39,6 +39,9 @@ source('model_forMCMC.R')
 n_parameters <- length(parnames_const_calib)
 n_parameters_time <- length(parnames_time_calib)
 
+## updated Cretaceous-matching time-varying parameter centers?
+par_time_center <- read.csv("par_time_mean_cret.csv")
+
 ## preliminary simulation to get the length
 model_out <- model_forMCMC( par_calib=par_calib0,
                             par_time=par_time_center,

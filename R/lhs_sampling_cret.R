@@ -29,7 +29,7 @@ tbeg <- proc.time()
 if (n_sample <= n_sample_per_chunk) {
   # business as usual
 
-  set.seed(2020)
+  set.seed(2021)
   parameters_lhs <- randomLHS(n_sample, n_parameters)
   par_calib <- parameters_lhs  # initialize
 
@@ -44,6 +44,7 @@ print("here for some reason? Not used")
   n_sample_this_chunk[n_chunk] <- n_sample - (n_chunk-1)*n_sample_per_chunk
 
   # sample the constant parameters from one large LHS and divide
+  set.seed(2021)
   parameters_lhs <- randomLHS(n_sample, n_parameters)
 
   # constant parameter sampling
@@ -97,7 +98,7 @@ print("here for some reason? Not used")
 
   for (cc in 1:n_chunk) {
     # do simulations... only return the results with at most 50% %outbound
-
+if(TRUE){
     # within simulation loop, do the time series sampling
     covariance_samples <- array(dim=c(n_time,n_time,n_sample_this_chunk[cc],n_parameters_time))
     time_series_samples <- array(dim=c(n_time,n_sample_this_chunk[cc],n_parameters_time))
@@ -117,13 +118,14 @@ print("here for some reason? Not used")
         }
       }
     }
-
+}
     # run the simulations
     model_co2_this_chunk <- model_temp_this_chunk <- mat.or.vec(nr=n_time, nc=n_sample_this_chunk[cc])
     prcout_co2 <- prcout_temp <- rep(NA, n_sample_this_chunk[cc])
     for (ii in 1:n_sample_this_chunk[cc]) {
       model_out <- model_forMCMC(par_calib=par_calib[[cc]][ii,],
-                                 par_time=time_series_samples[,ii,],
+                                 #par_time=time_series_samples[,ii,],
+                                 par_time=par_time_center,
                                  par_fixed=par_const_fixed0,
                                  parnames_calib=parnames_const_calib,
                                  parnames_fixed=parnames_const_fixed,
