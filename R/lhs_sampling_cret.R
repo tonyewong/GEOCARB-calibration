@@ -21,6 +21,8 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
+idx_cret <- 49
+
 # compute the degrees of freedom for the time series inverse Wishart prior on
 # their covariance
 source("time_series_df.R")
@@ -29,7 +31,7 @@ tbeg <- proc.time()
 if (n_sample <= n_sample_per_chunk) {
   # business as usual
 
-  set.seed(2020)
+  set.seed(2021)
   parameters_lhs <- randomLHS(n_sample, n_parameters)
   par_calib <- parameters_lhs  # initialize
 
@@ -44,6 +46,7 @@ print("here for some reason? Not used")
   n_sample_this_chunk[n_chunk] <- n_sample - (n_chunk-1)*n_sample_per_chunk
 
   # sample the constant parameters from one large LHS and divide
+  set.seed(2021)
   parameters_lhs <- randomLHS(n_sample, n_parameters)
 
   # constant parameter sampling
@@ -144,6 +147,11 @@ print("here for some reason? Not used")
       # use the percent-outbound approach of Mill et al 2019 (Gondwana Research)
       prcout_co2[ii] <- percout(model_co2_this_chunk[,ii], windows$co2)
       prcout_temp[ii] <- percout(model_temp_this_chunk[,ii], windows$temp)
+      ## toss anything outside of the temperature window at 100 Mya
+      if (any(model_temp_this_chunk[idx_cret,ii] < windows$temp[idx_cret,"low"]) |
+          any(model_temp_this_chunk[idx_cret,ii] > windows$temp[idx_cret,"high"])) {
+        prcout_temp[ii] <- 1
+      }
     }
 
     # do the following for CO2-only, temperature-only, and CO2+temperature
