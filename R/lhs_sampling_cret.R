@@ -98,7 +98,6 @@ print("here for some reason? Not used")
 
   for (cc in 1:n_chunk) {
     # do simulations... only return the results with at most 50% %outbound
-if(TRUE){
     # within simulation loop, do the time series sampling
     covariance_samples <- array(dim=c(n_time,n_time,n_sample_this_chunk[cc],n_parameters_time))
     time_series_samples <- array(dim=c(n_time,n_sample_this_chunk[cc],n_parameters_time))
@@ -118,7 +117,7 @@ if(TRUE){
         }
       }
     }
-}
+
     # run the simulations
     model_co2_this_chunk <- model_temp_this_chunk <- mat.or.vec(nr=n_time, nc=n_sample_this_chunk[cc])
     prcout_co2 <- prcout_temp <- rep(NA, n_sample_this_chunk[cc])
