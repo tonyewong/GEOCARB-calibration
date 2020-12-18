@@ -1,3 +1,11 @@
+##==============================================================================
+## cretaceous_experiment.R
+##
+##
+## Questions? Tony Wong (aewsma@rit.edu)
+##==============================================================================
+
+library("Hmisc")
 
 if(Sys.info()['user']=='tony') {
   # Tony's local machine (if you aren't me, you almost certainly need to change this...)
@@ -23,11 +31,14 @@ load("../output/lhs_param_ct_out50.RData")
 par_calib$ctrl <- par_calib_save
 par_time$ctrl <- par_time_save
 
+## this is the original cretaceous-matching experiment, at 50%-outbound and letting the time series parameters run wild
 load("../output/lhs_cret_param_ct_out50_cret.RData")
 par_calib$cret <- par_calib_save
 par_time$cret <- par_time_save
 
+
 ## time-varying parameter means
+## these are used for the second experiment (that yields `lhs_cret_param_ct_out30_cret.RData`)
 par_time_mean <- vector("list", n_experiments); names(par_time_mean) <- experiments
 for (ee in experiments) {
   par_time_mean[[ee]] <- mat.or.vec(nr=dim(par_time[[ee]])[1], nc=dim(par_time[[ee]])[3])
@@ -36,6 +47,7 @@ for (ee in experiments) {
   }
 }
 write.csv(par_time_mean$cret, file="par_time_mean_cret.csv")
+
 
 ## set up stuff for running model
 param_choice <- 'all'   # Calibrate all 68 parameters? ("all") or only the 6 from Park and Royer 2011 ("PR2011")
@@ -155,8 +167,8 @@ ee <- "ctrl"
 plot(-age, model_temp[[ee]][,1], type='l', xlim=c(-420,0), ylim=c(0,50), xaxt='n', yaxt='n', xlab='', ylab='')
 for (ii in 1:nrow(par_calib[[ee]])) {lines(-age, model_temp[[ee]][,ii], col='gray80')}
 lines(-age, windows$temp[,"low"],col="red", lwd=1.5); lines(-age, windows$temp[,"high"],col="red", lwd=1.5)
-mtext(side=1, text="Time [Myr ago]", line=2.2)
-mtext(side=2, text="Temperature [deg C]", line=2.2)
+mtext(side=1, text="Time (Myr ago)", line=2.2)
+mtext(expression("        Global average\nsurface temperature ("*degree*"C)"), side=2, line=2.2)
 mtext(side=3, text="Control", line=0.15)
 axis(side=1, at=seq(from=-400, to=0, by=100), labels=seq(from=400, to=0, by=-100), padj=-0.4)
 axis(side=1, at=seq(from=-350, to=0, by=100), labels=rep('', 4), lwd=0.5)
@@ -165,8 +177,8 @@ ee <- "cret"
 plot(-age, model_temp[[ee]][,1], type='l', xlim=c(-420,0), ylim=c(0,50), xaxt='n', yaxt='n', xlab='', ylab='')
 for (ii in 1:nrow(par_calib[[ee]])) {lines(-age, model_temp[[ee]][,ii], col='gray80')}
 lines(-age, windows$temp[,"low"],col="red", lwd=1.5); lines(-age, windows$temp[,"high"],col="red", lwd=1.5)
-mtext(side=1, text="Time [Myr ago]", line=2.2)
-mtext(side=2, text="Temperature [deg C]", line=2.2)
+mtext(side=1, text="Time (Myr ago)", line=2.2)
+mtext(expression("        Global average\nsurface temperature ("*degree*"C)"), side=2, line=2.2)
 mtext(side=3, text="Cretaceous-matching", line=0.15)
 axis(side=1, at=seq(from=-400, to=0, by=100), labels=seq(from=400, to=0, by=-100), padj=-0.4)
 axis(side=1, at=seq(from=-350, to=0, by=100), labels=rep('', 4), lwd=0.5)
@@ -175,14 +187,6 @@ dev.off()
 
 ##==============================================================================
 ## parameter distributions
-
-for (ee in experiments) {
-  kdes[[ee]] <- vector("list", ncol(par_calib[[ee]]))
-  names(kdes[[ee]]) <- parnames_const
-  for (pp in parnames_const) {
-    kdes[[ee]][[pp]] <- density(par_calib[[ee]][,match(pp,parnames_const)])
-  }
-}
 
 # boxplots
 pdf('../figures/par_calib_comparison_cret.pdf',width=7.5,height=9, colormodel='cmyk', pointsize=11)
@@ -194,54 +198,138 @@ for (pp in 1:length(parnames_const)) {
 }
 dev.off()
 
-# deltaT2X density plots
-pdf('../figures/deltaT2X_cret.pdf',width=4,height=3, colormodel='cmyk', pointsize=11)
-par(mfrow=c(1,1), mai=c(.7,.35,.13,.15))
-plot(kdes$ctrl$deltaT2X$x, kdes$ctrl$deltaT2X$y, type='l', lwd=1.5, col='black',
-     xlab='', ylab='', yaxt='n', xlim=c(1.65,6.65), ylim=c(0,0.65), yaxs='i')
-lines(kdes$cret$deltaT2X$x, kdes$cret$deltaT2X$y, lwd=1.5, lty=5, col='firebrick')
-mtext(side=1, text=expression(Delta*"T2X [deg C]"), line=2.3)
-mtext(side=2, text="Probability density", line=0.5)
-legend(4, 0.65, c("Control", "Cretaceous-matching"), lty=c(1,5), lwd=1.5, col=c("black", "firebrick"), bty="n")
-dev.off()
-
-##==============================================================================
-## changes in deltaT2X with experiment, and prcout
-
-idx30 <- idx40 <- idx50 <- vector('list', length=n_experiments)
-names(idx30) <- names(idx40) <- names(idx50) <- experiments
-for (ee in experiments) {
-    idx30[[ee]] <- which(prcout_temp[[ee]] <= 0.3 & prcout_co2[[ee]] <= 0.3)
-    idx40[[ee]] <- which(prcout_temp[[ee]] <= 0.4 & prcout_co2[[ee]] <= 0.4)
-    idx50[[ee]] <- which(prcout_temp[[ee]] <= 0.5 & prcout_co2[[ee]] <= 0.5)
-}
-print(quantile(par_calib$cret[,10], c(.05,.5,.95)))
-print(quantile(par_calib$cret[idx50$cret,10], c(.05,.5,.95)))
-print(quantile(par_calib$cret[idx40$cret,10], c(.05,.5,.95)))
-print(quantile(par_calib$cret[idx30$cret,10], c(.05,.5,.95)))
-
-bp <- vector('list', length=6); names(bp) <- c("Cret30", "Ctrl30", "Cret40", "Ctrl40", "Cret50", "Ctrl50")
-bp$Ctrl50 <- par_calib$ctrl[idx50$ctrl,10]
-bp$Cret50 <- par_calib$cret[idx50$cret,10]
-bp$Ctrl40 <- par_calib$ctrl[idx40$ctrl,10]
-bp$Cret40 <- par_calib$cret[idx40$cret,10]
-bp$Ctrl30 <- par_calib$ctrl[idx30$ctrl,10]
-bp$Cret30 <- c(par_calib$cret[idx30$cret,10], par_calib_save[,10])
-
-pdf('../figures/deltaT2X_boxplots_cret.pdf',width=4,height=3, colormodel='cmyk', pointsize=11)
-par(mfrow=c(1,1), mai=c(.7,.35,.13,.15))
-boxplot(bp, lty=1, pch=4, horizontal=TRUE, las=1, col=c("lightblue","gray70","lightblue","gray70","lightblue","gray70"), yaxt='n', cex.axis=1.2)
-mtext(side=1, expression(Delta * "T2X ["^o *"C]"), line=2.6, cex=0.85)
-axis(side=2, at=1:6, las=1, labels=c("Cret-30%","Ctrl-30%","Cret-40%","Ctrl-40%","Cret-50%","Ctrl-50%"), cex.axis=1.1)
-dev.off()
-
-
 ##==============================================================================
 ## time series plots
 
-c(7,8,9,10)
+idx_time <- c(6,7,8,9)
+descriptions <- c("Land area relative to present",
+                  "Global river runoff relative to present",
+                  "Fraction of land area that undergoes\nchemical weathering relative to present",
+                  "Response of temperature change on river runoff")
 
-pp <- 7; plot(-age, par_time_mean$ctrl[,pp], col="black", lwd=1.5, type='l', ylab=parnames_time[pp]); lines(-age, par_time_mean$cret[,pp], lwd=1.5, col="firebrick")
+pdf('../figures/par_time_cret.pdf',width=5,height=8, colormodel='cmyk', pointsize=11)
+par(mfrow=c(4,1), mai=c(.6,.7,.4,.1))
+pp <- idx_time[1]
+plot(-age, par_time_mean$ctrl[,pp], col="black", lwd=2, type='l', xlab="", ylab="", xaxt="n", yaxt="n", xaxs="i", xlim=c(-570,0), ylim=c(0,1.25))
+lines(-age, par_time_mean$cret[,pp], lwd=1.5, col="firebrick", lty=5)
+axis(side=1, at=seq(from=-600, to=0, by=100), labels=seq(from=600, to=0, by=-100), padj=-0.4, cex.axis=1.5)
+axis(side=1, at=seq(from=-550, to=0, by=100), labels=rep('', 6), lwd=0.5)
+axis(side=2, at=seq(from=0, to=1.25, by=0.2), las=1, cex.axis=1.5)
+mtext(side=1, text="Time (Myr ago)", line=2.2, cex=1.2)
+mtext(side=2, expression("f"[A]*" (unitless)"), cex=1.2, line=3.6)
+mtext(side=3, text=descriptions[match(pp,idx_time)], line=1, cex=1.2)
+mtext(side=3, text=expression(bold('a')), line=1, cex=1, adj=-0.07)
+legend("bottomleft", legend=c("Original","Cretaceous-matching"), lty=c(1,5), lwd=1.3, col=c("black","firebrick"), cex=1.2)
+grid()
+pp <- idx_time[2]
+plot(-age, par_time_mean$ctrl[,pp], col="black", lwd=2, type='l', xlab="", ylab="", xaxt="n", yaxt="n", xaxs="i", xlim=c(-570,0), ylim=c(0,1.25))
+lines(-age, par_time_mean$cret[,pp], lwd=1.5, col="firebrick", lty=5)
+axis(side=1, at=seq(from=-600, to=0, by=100), labels=seq(from=600, to=0, by=-100), padj=-0.4, cex.axis=1.5)
+axis(side=1, at=seq(from=-550, to=0, by=100), labels=rep('', 6), lwd=0.5)
+axis(side=2, at=seq(from=0, to=1.25, by=0.2), las=1, cex.axis=1.5)
+mtext(side=1, text="Time (Myr ago)", line=2.2, cex=1.2)
+mtext(side=2, expression("f"[D]*" (unitless)"), cex=1.2, line=3.6)
+mtext(side=3, text=descriptions[match(pp,idx_time)], line=1, cex=1.2)
+mtext(side=3, text=expression(bold('b')), line=1, cex=1, adj=-0.07);
+grid()
+pp <- idx_time[3]
+plot(-age, par_time_mean$ctrl[,pp], col="black", lwd=2, type='l', xlab="", ylab="", xaxt="n", yaxt="n", xaxs="i", xlim=c(-570,0), ylim=c(0,1.25))
+lines(-age, par_time_mean$cret[,pp], lwd=1.5, col="firebrick", lty=5)
+axis(side=1, at=seq(from=-600, to=0, by=100), labels=seq(from=600, to=0, by=-100), padj=-0.4, cex.axis=1.5)
+axis(side=1, at=seq(from=-550, to=0, by=100), labels=rep('', 6), lwd=0.5)
+axis(side=2, at=seq(from=0, to=1.25, by=0.2), las=1, cex.axis=1.5)
+mtext(side=1, text="Time (Myr ago)", line=2.2, cex=1.2)
+mtext(side=2, expression("f"[AW]*"/f"[A]*" (unitless)"), cex=1.2, line=3.6)
+mtext(side=3, text=descriptions[match(pp,idx_time)], line=0.5, cex=1.2)
+mtext(side=3, text=expression(bold('c')), line=1, cex=1, adj=-0.07);
+grid()
+pp <- idx_time[4]
+plot(-age, par_time_mean$ctrl[,pp], col="black", lwd=2, type='l', xlab="", ylab="", xaxt="n", yaxt="n", xaxs="i", xlim=c(-570,0), ylim=c(0,.08))
+lines(-age, par_time_mean$cret[,pp], lwd=1.5, col="firebrick", lty=5)
+axis(side=1, at=seq(from=-600, to=0, by=100), labels=seq(from=600, to=0, by=-100), padj=-0.4, cex.axis=1.5)
+axis(side=1, at=seq(from=-550, to=0, by=100), labels=rep('', 6), lwd=0.5)
+axis(side=2, at=seq(from=0, to=0.1, by=0.02), las=1, cex.axis=1.5)
+mtext(side=1, text="Time (Myr ago)", line=2.2, cex=1.2)
+mtext(side=2, paste(parnames_time[pp], "(1/K)"), cex=1.2, line=3.6)
+mtext(side=3, text=descriptions[match(pp,idx_time)], line=1, cex=1.2)
+mtext(side=3, text=expression(bold('d')), line=1, cex=1, adj=-0.07);
+grid()
+dev.off()
+
+
+
+##==============================================================================
+
+## at this point, the new experiment should be run where the time series parameters'
+## centers are set from `par_time_mean_cret.csv` (written above)
+
+##==============================================================================
+
+## load output from 30%-outbound control experiment
+load("../output/lhs_param_ct_out30_seed13574.RData")
+par_calib_ctrl30 <- par_calib_save
+load("../output/lhs_param_ct_out30_seed2020.RData")
+par_calib_ctrl30 <- rbind(par_calib_ctrl30, par_calib_save)
+load("../output/lhs_param_ct_out30_seed11.RData")
+par_calib_ctrl30 <- rbind(par_calib_ctrl30, par_calib_save)
+
+## this is the second cretaceous-matching experiment, at 30%-outbound and sampling the time series parameters from distributions with updated centers, based on the previous experiment
+load("../output/lhs_cret_param_ct_out30_cret.RData")
+par_calib_cret30 <- par_calib_save
+par_time_cret30 <- par_time_save
+
+## check the ESS
+## --> original 30% outbound
+quantile(par_calib_ctrl30[,10], c(.05,.25,.5,.75,.95))
+## --> Cretaceous-matching, resampled with updated time-varying parameters, 30% outbound ALL simulations
+quantile(par_calib_cret30[,10], c(.05,.25,.5,.75,.95))
+## --> Cretaceous-matching, resampled with updated time-varying parameters, 30% outbound only simulations within 1 SD of fAw_fA at 90 Mya
+quantile(par_calib_cret30[idx,10], c(.05,.25,.5,.75,.95))
+
+## --> original 50% outbound
+quantile(par_calib$ctrl[,10], c(.05,.25,.5,.75,.95))
+## --> Cretaceous-matching, not yet resampled
+quantile(par_calib$cret[,10], c(.05,.25,.5,.75,.95))
+
+## time-varying parameter means,
+##  *** from simulations forced to match Cretaceous,
+##  *** then an ensemble generated using the updated means above as the centers for the time-varying parameter distributions
+## this is just to check that the means don't change too much away from the original centers
+idx <- which(abs(par_time_cret30[49,,8] - par_time_center[49,8]) < par_time_stdev[49,8])
+par_time_mean_cret <- mat.or.vec(nr=dim(par_time$cret)[1], nc=dim(par_time$cret)[3])
+for (pp in 1:dim(par_time$cret)[3]) {
+    par_time_mean_cret[,pp] <- apply(X=par_time_cret30[,idx,pp], MARGIN=1, FUN=mean)
+}
+
+## deltaT2X density estimates
+for (ee in experiments) {
+  kdes[[ee]] <- vector("list", ncol(par_calib[[ee]]))
+  names(kdes[[ee]]) <- parnames_const
+  if (ee == "ctrl") {for (pp in parnames_const) {kdes[[ee]][[pp]] <- density(par_calib_ctrl30[,match(pp,parnames_const)])}}
+  if (ee == "cret") {for (pp in parnames_const) {kdes[[ee]][[pp]] <- density(par_calib_cret30[,match(pp,parnames_const)])}}
+}
+pdf_cret <- density(par_calib_cret30[,match("deltaT2X", parnames_const)], from=1.5, to=10)
+pdf_cret_glac <- density(par_calib_cret30[,match("deltaT2X", parnames_const)]*par_calib_cret30[,match("GLAC", parnames_const)], from=1.5, to=20)
+save(list=c("pdf_cret","pdf_cret_glac"), file="../output/pdf_cret.RData")
+
+## deltaT2X density plots  <------ here now! finishing polishing the figure up
+## deltaT2X density plots  <------ here now! finishing polishing the figure up
+## deltaT2X density plots  <------ here now! finishing polishing the figure up
+
+pdf('../figures/deltaT2X_cret.pdf',width=4,height=3, colormodel='cmyk', pointsize=11)
+par(mfrow=c(1,1), mai=c(.7,.35,.13,.15))
+plot(kdes$ctrl$deltaT2X$x, kdes$ctrl$deltaT2X$y, type='l', lwd=1.5, col='steelblue', lty=1,
+     xlab='', ylab='', yaxt='n', xlim=c(1.55,6.65), ylim=c(0,0.85), xaxs='i', yaxs='i', frame.plot=FALSE)
+lines(kdes$cret$deltaT2X$x, kdes$cret$deltaT2X$y, lwd=1.5, lty=5, col='firebrick')
+mtext(expression(Delta*"T"['2x']*" ("*degree*"C)"), side=1, line=2.3)
+mtext('Density', side=2, line=0.3)
+minor.tick(nx=2, ny=0, tick.ratio=0.5)
+arrows(1.6, 0, 1.65, .85, length=0.08, angle=30, code=2)
+legend(3.6, 0.85, c("Cretaceous-matching", "Control"), lty=c(5,1), lwd=1.5, col=c("firebrick", "steelblue"), bty="n")
+dev.off()
+
+##==============================================================================
+
 
 
 ##==============================================================================
