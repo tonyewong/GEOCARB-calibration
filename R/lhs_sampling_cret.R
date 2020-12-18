@@ -100,7 +100,6 @@ print("here for some reason? Not used")
 
   for (cc in 1:n_chunk) {
     # do simulations... only return the results with at most 50% %outbound
-
     # within simulation loop, do the time series sampling
     covariance_samples <- array(dim=c(n_time,n_time,n_sample_this_chunk[cc],n_parameters_time))
     time_series_samples <- array(dim=c(n_time,n_sample_this_chunk[cc],n_parameters_time))
@@ -126,7 +125,8 @@ print("here for some reason? Not used")
     prcout_co2 <- prcout_temp <- rep(NA, n_sample_this_chunk[cc])
     for (ii in 1:n_sample_this_chunk[cc]) {
       model_out <- model_forMCMC(par_calib=par_calib[[cc]][ii,],
-                                 par_time=time_series_samples[,ii,],
+                                 #par_time=time_series_samples[,ii,],
+                                 par_time=par_time_center,
                                  par_fixed=par_const_fixed0,
                                  parnames_calib=parnames_const_calib,
                                  parnames_fixed=parnames_const_fixed,
@@ -173,7 +173,11 @@ print("here for some reason? Not used")
     }
 
     if( (length(idx_save)+max(nrow(par_calib_save),0)) >= n_sample_min) {
-      idx_save <- idx_save[1:(n_sample_min-nrow(par_calib_save))]
+      if (is.null(nrow(par_calib_save))) {
+        idx_save <- idx_save[1:(n_sample_min)]
+      } else {
+        idx_save <- idx_save[1:(n_sample_min-nrow(par_calib_save))]
+      }
       par_calib_save <- rbind(par_calib_save, par_calib[[cc]][idx_save,])
       par_time_save <- abind(par_time_save, time_series_samples[,idx_save,], along=2)
       par_covar_save <- abind(par_covar_save, covariance_samples[,,idx_save,], along=3)
