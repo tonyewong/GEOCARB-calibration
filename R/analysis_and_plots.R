@@ -152,18 +152,15 @@ for (bb in prc_outbound) {
             prcout[[bb]][[dd]][ii,"co2"] <- percout(model_out[,"co2"], windows$co2)
             prcout[[bb]][[dd]][ii,"temp"] <- percout(model_out[,"temp"] + 15, windows$temp)
             model_hindcast[[bb]][[dd]]$co2[,ii] <- model_out[,"co2"]
-            model_hindcast[[bb]][[dd]]$temp[,ii] <- model_out[,"temp"] + par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]][ii],"Ws"]*model_out[,1]/570 + 15 # as in Berner 2004
-            # ^-- adding the Ws*t/570 solar luminosity contribution back in, so we have actual temperatures
+            model_hindcast[[bb]][[dd]]$temp[,ii] <- model_out[,"temp"] + par_time[[bb]][[dd]][, ii, match("GEOG",parnames_time)] + 15 # as in Berner 2004
+            # ^-- temperatures in model output already include the Ws solar luminosity term to be akin to Mills et al windows. Just need GEOG.
+#            model_hindcast[[bb]][[dd]]$temp[,ii] <- model_out[,"temp"] + par_calib[[bb]][[dd]][idx_sample[[bb]][[dd]][ii],"Ws"]*model_out[,1]/570 + 15 # as in Berner 2004
         }
     }
 }
 
 ## compute model quantiles for plotting against proxy data, for each experiment
 
-model_quantiles <- vector("list", length(prc_outbound))
-names(model_quantiles) <- prc_outbound
-for (bb in prc_outbound) {
-		model_quantiles[[bb]] <- vector("list", length(data_sets))
     names(model_quantiles[[bb]]) <- data_sets
     for (dd in data_sets) {
     		model_quantiles[[bb]][[dd]] <- vector("list", 2)
@@ -196,7 +193,7 @@ ifirst <- idx_data[1]
 idx_data <- c(ifirst-1, idx_data) # start time series 1 earlier for continuity in the figure
 
 
-pdf('../figures/model_vs_proxy.pdf',width=4,height=6,colormodel='cmyk', pointsize=11)
+pdf('../figures/model_vs_proxy2.pdf',width=4,height=6,colormodel='cmyk', pointsize=11)
 
 par(mfrow=c(2,1), mai=c(0.6,.9,.18,.15))
 plot(-time, log10(model_quantiles[[bb]][[dd]]$co2[,"0.5"]), type='l', xlim=c(-425,0), ylim=c(-0.3,log10(40000)), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
@@ -220,11 +217,11 @@ legend(-420, 0.6, c('This work (median and 50%, 90% and 95% ranges)',expression(
 legend(-420, 0.6, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al. (2017)'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   a')), line=0, cex=1, adj=-0.24);
 
-plot(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles[[bb]][[dd]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(5,56), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
 igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.025"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.025"], lwd=1, lty=5)
 igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.975"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.975"], lwd=1, lty=5)
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+polygon(-c(time,rev(time)), c(windows$temp_sol_geog[,"high"],rev(windows$temp_sol_geog[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.025"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.05"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles[[bb]][[dd]]$temp[,"0.25"],rev(model_quantiles[[bb]][[dd]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
@@ -235,8 +232,8 @@ axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'))
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=seq(from=0, to=60, by=10), las=1)
-legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al. (2019)'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1)
-legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al. (2019)'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1)
+legend(-420, 56, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al. (2019)'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.6, bty='n', y.intersp=1)
+legend(-420, 56, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al. (2019)'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), cex=.6, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   b')), line=0, cex=1, adj=-0.24);
 
 dev.off()

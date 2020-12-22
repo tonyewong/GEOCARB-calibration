@@ -85,7 +85,14 @@ idx_temp <- match(-age, data_temps[,"time"])
 windows_temp <- windows_temp[idx_temp,]
 windows$temp[,c("low","high")] <- windows_temp
 windows$temp_sol <- windows$temp + array(rep(7.4*time/570,2), dim=c(58,2))
+windows$temp_sol_geog <- windows$temp + array(rep(par_time_center[,"GEOG"],2), dim=c(58,2))
 
+# So, `windows$temp` has the solar luminosity contribution included, but
+# `windows$temp_sol` has it removed.
+# The `lhs_sampling.R` precalibration includes solar luminosity:
+# -->       prcout_temp[ii] <- percout(model_temp_this_chunk[,ii], windows$temp)
+# But for plotting, we'll want to (edit 21 Dec 2020) add back in the paleogeography component too:
+# -->
 ##==============================================================================
 
 

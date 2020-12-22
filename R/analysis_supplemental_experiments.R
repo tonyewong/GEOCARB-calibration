@@ -209,9 +209,11 @@ for (ee in supp_names) {
       prcout_supp[[ee]][ii,"temp"] <- percout(model_out[,"temp"] + 15, windows$temp)
       # save hindcasts
       model_hindcast_supp[[ee]]$co2[,ii] <- model_out[,"co2"]
-      model_hindcast_supp[[ee]]$temp[,ii] <- model_out[,"temp"] + par_calib_supp[[ee]][ii,"Ws"]*model_out[,"age"]/570 + 15 # as in Berner 2004
-      # ^-- adding the Ws*t/570 solar luminosity contribution back in, so we have actual temperatures
-      #     it is subtracted out in run_geocarb.f90 so it is easier to compare with the Mills temperatures
+      model_hindcast_supp[[ee]]$temp[,ii] <- model_out[,"temp"] + par_time_supp[[ee]][, ii, match("GEOG",parnames_time)] + 15 # as in Berner 2004
+      # ^-- temperatures in model output already include the Ws solar luminosity term to be akin to Mills et al windows. Just need GEOG.
+      ##      model_hindcast_supp[[ee]]$temp[,ii] <- model_out[,"temp"] + par_calib_supp[[ee]][ii,"Ws"]*model_out[,"age"]/570 + 15 # as in Berner 2004
+            # ^-- adding the Ws*t/570 solar luminosity contribution back in, so we have actual temperatures
+            #     it is subtracted out in run_geocarb.f90 so it is easier to compare with the Mills temperatures
   }
 }
 
@@ -303,11 +305,11 @@ legend(-420, 0.79, c('This work (median and 50%, 90% and 95% ranges)',expression
 legend(-420, 0.79, c('This work (median and 50%, 90% and 95% ranges)',expression('95% range without CO'[2]*' data'),'Data from Foster et al [2017]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(0,0,.6,.5),'black',rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   a')), line=0, cex=1, adj=-0.24);
 # -- temperature
-plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(5,56), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.025"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.025"], lwd=1, lty=5)
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.975"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.975"], lwd=1, lty=5)
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+polygon(-c(time,rev(time)), c(windows$temp_sol_geog[,"high"],rev(windows$temp_sol_geog[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(model_quantiles_supp[[ee]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
@@ -318,8 +320,8 @@ axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), cex.axis=1.2)
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=seq(from=0, to=60, by=10), las=1, cex.axis=1.2)
-legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
-legend(-420, 51, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
+legend(-420, 56, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c(15,NA,15), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
+legend(-420, 56, c('This work (median and 50%, 90% and 95% ranges)','95% range without temperature data','Data from Mills et al [2019]'), pch=c('-','',''), lty=c(NA,5,NA), col=c(rgb(.6,0,0,.5),'black',rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   b')), line=0, cex=1, adj=-0.24);
 mtext(side=4, text="Control", line=1.2, cex=1.2)
 
@@ -344,11 +346,11 @@ axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
 mtext(side=3, text=expression(bold('   c')), line=0, cex=1, adj=-0.24);
 # -- temperature
-plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(5,56), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.025"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.025"], lwd=1, lty=5)
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.975"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.975"], lwd=1, lty=5)
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+polygon(-c(time,rev(time)), c(windows$temp_sol_geog[,"high"],rev(windows$temp_sol_geog[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(model_quantiles_supp[[ee]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
@@ -383,11 +385,11 @@ axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
 mtext(side=3, text=expression(bold('   e')), line=0, cex=1, adj=-0.24);
 # -- temperature
-plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(5,56), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.025"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.025"], lwd=1, lty=5)
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.975"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.975"], lwd=1, lty=5)
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+polygon(-c(time,rev(time)), c(windows$temp_sol_geog[,"high"],rev(windows$temp_sol_geog[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(model_quantiles_supp[[ee]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
@@ -422,11 +424,11 @@ axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
 mtext(side=3, text=expression(bold('   g')), line=0, cex=1, adj=-0.24);
 # -- temperature
-plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(5,56), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.025"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.025"], lwd=1, lty=5)
 #igood <- which(is.finite(model_quantiles[[bb]]$c$temp[,"0.975"])); lines(-time[igood], model_quantiles[[bb]]$c$temp[igood,"0.975"], lwd=1, lty=5)
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+polygon(-c(time,rev(time)), c(windows$temp_sol_geog[,"high"],rev(windows$temp_sol_geog[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.025"],rev(model_quantiles_supp[[ee]]$temp[,"0.975"])), col=rgb(.6,0,0,.25), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
@@ -468,31 +470,31 @@ ilo <- which(is.finite(model_quantiles_supp[[ee]]$co2[,"0.25"])); ihi <- which(i
 polygon(-c(time[ilo],rev(time[ihi])), log10(c(model_quantiles_supp[[ee]]$co2[ilo,"0.25"],rev(model_quantiles_supp[[ee]]$co2[ihi,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
 #polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
 lines(-time, log10(model_quantiles_supp[[ee]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,.15,.7))
-mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
-mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.75, , cex=0.9)
+mtext('Time (Myr ago)', side=1, line=2.1, cex=0.9)
+mtext(expression('CO'[2]*' concentration (ppmv)'), side=2, line=3.75, , cex=0.9)
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), , cex.axis=1.2)
 ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,100000,10000)))
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'), las=1, , cex.axis=1.2)
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
-legend(-420, 0.71, c('This work (median, 50% and 90% ranges)','Data from Foster et al [2017]'), pch=c(15,15), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
-legend(-420, 0.71, c('This work (median, 50% and 90% ranges)','Data from Foster et al [2017]'), pch=c('-',''), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
+legend(-420, 0.71, c('This work (median, 50% and 90% ranges)','Data from Foster et al (2017)'), pch=c(15,15), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
+legend(-420, 0.71, c('This work (median, 50% and 90% ranges)','Data from Foster et al (2017)'), pch=c('-',''), col=c(rgb(0,0,.6,.5),rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   a')), line=0, cex=1, adj=-0.24);
 # -- temperature
-plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(5,56), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+polygon(-c(time,rev(time)), c(windows$temp_sol_geog[,"high"],rev(windows$temp_sol_geog[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
 lines(-time, model_quantiles_supp$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
-mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
-mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2, cex=0.9)
+mtext('Time (Myr ago)', side=1, line=2.1, cex=0.9)
+mtext(expression("        Global average\nsurface temperature ("*degree*"C)"), side=2, line=2.2, cex=0.9)
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), cex.axis=1.2)
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
 axis(2, at=seq(from=0, to=60, by=10), las=1, cex.axis=1.2)
-legend(-420, 52, c('This work (median, 50% and 90% ranges)','Data from Mills et al [2019]'), pch=c(15,15), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
-legend(-420, 52, c('This work (median, 50% and 90% ranges)','Data from Mills et al [2019]'), pch=c('-',''), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
+legend(-420, 57, c('This work (median, 50% and 90% ranges)','Data from Mills et al (2019)'), pch=c(15,15), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), pt.cex=1.2, cex=.9, bty='n', y.intersp=1)
+legend(-420, 57, c('This work (median, 50% and 90% ranges)','Data from Mills et al (2019)'), pch=c('-',''), col=c(rgb(.6,0,0,.5),rgb(.5,.5,.5,.5)), cex=.9, bty='n', y.intersp=1)
 mtext(side=3, text=expression(bold('   b')), line=0, cex=1, adj=-0.24);
 mtext(side=4, text="Control", line=0.7, cex=1.1)
 
@@ -510,8 +512,8 @@ ilo <- which(is.finite(model_quantiles_supp[[ee]]$co2[,"0.25"])); ihi <- which(i
 polygon(-c(time[ilo],rev(time[ihi])), log10(c(model_quantiles_supp[[ee]]$co2[ilo,"0.25"],rev(model_quantiles_supp[[ee]]$co2[ihi,"0.75"]))), col=rgb(0,.15,.7,.65), border=NA)
 #polygon(-c(time,rev(time)), log10(c(windows$co2[,"high"],rev(windows$co2[,"low"]))), col=rgb(.5,.5,.5,.5), border=NA)
 lines(-time, log10(model_quantiles_supp[[ee]]$co2[,"0.5"]), lwd=1, lty=1, col=rgb(0,.15,.7))
-mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
-mtext(expression('CO'[2]*' concentration [ppmv]'), side=2, line=3.75, , cex=0.9)
+mtext('Time (Myr ago)', side=1, line=2.1, cex=0.9)
+mtext(expression('CO'[2]*' concentration (ppmv)'), side=2, line=3.75, , cex=0.9)
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), , cex.axis=1.2)
 ticks=log10(c(seq(1,10,1),seq(10,100,10),seq(200,1000,100),seq(2000,10000,1000),seq(20000,100000,10000)))
 axis(2, at=ticks, labels=rep('',length(ticks)))
@@ -519,14 +521,14 @@ axis(2, at=log10(c(1,10,100,1000,10000)), labels=c('1','10','100','1000','10000'
 #axis(2, at=log10(c(3,10,30,100,300,1000,3000,10000)), labels=c('3','10','30','100','300','1000','3000','10000'), las=1)
 mtext(side=3, text=expression(bold('   c')), line=0, cex=1, adj=-0.24);
 # -- temperature
-plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(0,51), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
+plot(-time, model_quantiles_supp[[ee]]$temp[,"0.5"], type='l', xlim=c(-425,0), ylim=c(5,56), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n')
 grid()
-polygon(-c(time,rev(time)), c(windows$temp_sol[,"high"],rev(windows$temp_sol[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
+polygon(-c(time,rev(time)), c(windows$temp_sol_geog[,"high"],rev(windows$temp_sol_geog[,"low"])), col=rgb(.5,.5,.5,.5), border=1, lty=1)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.05"],rev(model_quantiles_supp[[ee]]$temp[,"0.95"])), col=rgb(.6,0,0,.45), border=NA)
 polygon(-c(time,rev(time)), c(model_quantiles_supp[[ee]]$temp[,"0.25"],rev(model_quantiles_supp[[ee]]$temp[,"0.75"])), col=rgb(.6,0,0,.65), border=NA)
 lines(-time, model_quantiles_supp$temp[,"0.5"], lwd=1, lty=1, col=rgb(.6,0,0))
-mtext('Time [Myr ago]', side=1, line=2.1, cex=0.9)
-mtext(expression("        Global average\nsurface temperature ["*degree*"C]"), side=2, line=2.2, cex=0.9)
+mtext('Time (Myr ago)', side=1, line=2.1, cex=0.9)
+mtext(expression("        Global average\nsurface temperature ("*degree*"C)"), side=2, line=2.2, cex=0.9)
 axis(1, at=seq(-400,0,100), labels=c('400','300','200','100','0'), cex.axis=1.2)
 ticks=seq(from=0, to=60, by=5)
 axis(2, at=ticks, labels=rep('',length(ticks)))
@@ -534,46 +536,6 @@ axis(2, at=seq(from=0, to=60, by=10), las=1, cex.axis=1.2)
 mtext(side=3, text=expression(bold('   d')), line=0, cex=1, adj=-0.24);
 mtext(side=4, text=expression("Linear "*Delta*"T"['2x']), line=0.7, cex=1.1)
 
-dev.off()
-
-
-
-
-##
-## Some calculations to report
-##
-
-# 49 is the timestep associated with age = 90 Myr ago, the peak of the temperature data
-idx_cret_supp <- which((model_hindcast_supp$`gym+timing`$temp[49,] >= windows$temp[49,"low"]) & (model_hindcast_supp$`gym+timing`$temp[49,] <= windows$temp[49,"high"]))
-idx_cret <- which((model_hindcast_supp$control$temp[49,] >= windows$temp[49,"low"]) & (model_hindcast_supp$control$temp[49,] <= windows$temp[49,"high"]))
-
-print("control:")
-print(quantile(par_calib_supp$control[,10], c(.025,.5,.975)))
-print("0.25GYM+timing:")
-print(quantile(par_calib_supp$`gym+timing`[,10], c(.025,.5,.975)))
-print("0.25GYM+timing, fits 90Myr ago temperature window:")
-print(quantile(par_calib_supp$`gym+timing`[idx_cret_supp,10], c(.025,.5,.975)))
-
-
-
-idx_deltaT2X <- match("deltaT2X", parnames_calib)
-pdf_supp <- density(par_calib_supp$`gym+timing`[,idx_deltaT2X], from=1.5, to=10)
-pdf_supp_glac <- density(par_calib_supp$`gym+timing`[,idx_deltaT2X]*par_calib_supp$`gym+timing`[,idx_deltaT2X+1], from=1.5, to=20)
-pdf_supp_fit <- density(par_calib_supp$`gym+timing`[idx_cret_supp,idx_deltaT2X], from=1.5, to=10)
-pdf_ctrl <- density(par_calib_supp$control[,idx_deltaT2X], from=1.5, to=10)
-
-pdf('../figures/deltaT2X_distributions_sens.pdf',width=4,height=3, colormodel='cmyk', pointsize=11)
-par(mfrow=c(1,1), mai=c(.7,.3,.13,.15))
-plot(pdf_ctrl$x, pdf_ctrl$y, type='l', lwd=1.7, lty=5, xlim=c(1.4,6.1), ylim=c(0,0.9), xlab='', ylab='', xaxs='i', yaxs='i', xaxt='n', yaxt='n', axes=FALSE, col="black")
-lines(pdf_supp$x, pdf_supp$y, lwd=1.7, lty=3, col="steelblue")
-lines(pdf_supp_fit$x, pdf_supp_fit$y, lwd=1.7, lty=1, col="firebrick")
-mtext(expression(Delta*"T"['2x']*" ("*degree*"C)"), side=1, line=2.3)
-mtext('Density', side=2, line=0.3)
-arrows(1.5, 0, 1.5, .75, length=0.08, angle=30, code=2)
-axis(1, at=seq(0,10))
-minor.tick(nx=4, ny=0, tick.ratio=0.5)
-legend(1.65,0.9, c('Control','0.25*GYM+timing','0.25*GYM+timing+fit 90 Myr window'),
-       lty=c(2,4,1), col=c("black","steelblue","firebrick"), bty='n', lwd=1.7, cex=0.9)
 dev.off()
 
 

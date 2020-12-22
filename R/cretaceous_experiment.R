@@ -154,6 +154,8 @@ for (ee in experiments) {
       # use the percent-outbound approach of Mill et al 2019 (Gondwana Research)
       prcout_co2[[ee]][ii] <- percout(model_co2[[ee]][,ii], windows$co2)
       prcout_temp[[ee]][ii] <- percout(model_temp[[ee]][,ii], windows$temp)
+      # actual temperature includes GEOG, which the windows don't have
+      model_temp[[ee]][,ii] <- model_out[,"temp"] + par_time[[ee]][,ii,match("GEOG",parnames_time)] + 15 # Note: Berner (2004; Eq 2.8 and 2.28) assumes present CO2 is 280 ppmv and T is 15 deg C
   }
 }
 
@@ -166,7 +168,7 @@ par(mfrow=c(2,1), mai=c(.7,.65,.3,.15))
 ee <- "ctrl"
 plot(-age, model_temp[[ee]][,1], type='l', xlim=c(-420,0), ylim=c(0,50), xaxt='n', yaxt='n', xlab='', ylab='')
 for (ii in 1:nrow(par_calib[[ee]])) {lines(-age, model_temp[[ee]][,ii], col='gray80')}
-lines(-age, windows$temp[,"low"],col="red", lwd=1.5); lines(-age, windows$temp[,"high"],col="red", lwd=1.5)
+lines(-age, windows$temp_sol_geog[,"low"],col="red", lwd=1.5); lines(-age, windows$temp_sol_geog[,"high"],col="red", lwd=1.5)
 mtext(side=1, text="Time (Myr ago)", line=2.2)
 mtext(expression("        Global average\nsurface temperature ("*degree*"C)"), side=2, line=2.2)
 mtext(side=3, text="Control", line=0.15)
@@ -176,7 +178,7 @@ axis(side=2, at=seq(from=0, to= 50, by=10), las=1, hadj=0.8)
 ee <- "cret"
 plot(-age, model_temp[[ee]][,1], type='l', xlim=c(-420,0), ylim=c(0,50), xaxt='n', yaxt='n', xlab='', ylab='')
 for (ii in 1:nrow(par_calib[[ee]])) {lines(-age, model_temp[[ee]][,ii], col='gray80')}
-lines(-age, windows$temp[,"low"],col="red", lwd=1.5); lines(-age, windows$temp[,"high"],col="red", lwd=1.5)
+lines(-age, windows$temp_sol_geog[,"low"],col="red", lwd=1.5); lines(-age, windows$temp_sol_geog[,"high"],col="red", lwd=1.5)
 mtext(side=1, text="Time (Myr ago)", line=2.2)
 mtext(expression("        Global average\nsurface temperature ("*degree*"C)"), side=2, line=2.2)
 mtext(side=3, text="Cretaceous-matching", line=0.15)
