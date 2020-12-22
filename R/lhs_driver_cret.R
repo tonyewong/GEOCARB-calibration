@@ -47,10 +47,10 @@ if(Sys.info()['user']=='tony') {
 
 ## Set testing number of samples and file name appendix here
 ## if there aren't enough samples on the MCMC output file, will break.
-#n_sample <- 20000000
-n_sample <- 100000
+n_sample <- 10000000
+#n_sample <-   1000000
 n_sample_per_chunk <- 10000 # maximum number of time series samples to consider at once
-n_sample_min <- 100 # minimum number of samples we'd be happy with; stop after this to avoid overrunning RAM
+n_sample_min <- 10000 # minimum number of samples we'd be happy with; stop after this to avoid overrunning RAM
 # if you don't want to use this, just set it greater than n_sample
 n_node <- 1 # distribute the chunks across multiple nodes?
 
@@ -59,7 +59,7 @@ data_choice <- 'F2017'    # Which data set?  PR2011 = Park and Royer (2011), or 
 fSR_choice <- 'DT2019'     # Which fSR time series? ("PR2011", "LENTON", "DT2019")
 plot.dir <- '../figures/'
 
-threshold_choices <- c(.5)
+threshold_choices <- c(.3)
 experiments <- expand.grid(threshold = threshold_choices,
                            use_co2 = c(FALSE, TRUE),
                            use_temperature = c(FALSE, TRUE))

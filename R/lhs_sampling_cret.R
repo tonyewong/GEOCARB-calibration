@@ -21,6 +21,8 @@
 ## along with GEOCARB-calibration.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
+idx_cret <- 49
+
 # compute the degrees of freedom for the time series inverse Wishart prior on
 # their covariance
 source("time_series_df.R")
@@ -145,6 +147,11 @@ print("here for some reason? Not used")
       # use the percent-outbound approach of Mill et al 2019 (Gondwana Research)
       prcout_co2[ii] <- percout(model_co2_this_chunk[,ii], windows$co2)
       prcout_temp[ii] <- percout(model_temp_this_chunk[,ii], windows$temp)
+      ## toss anything outside of the temperature window at 100 Mya
+      if (any(model_temp_this_chunk[idx_cret,ii] < windows$temp[idx_cret,"low"]) |
+          any(model_temp_this_chunk[idx_cret,ii] > windows$temp[idx_cret,"high"])) {
+        prcout_temp[ii] <- 1
+      }
     }
 
     # do the following for CO2-only, temperature-only, and CO2+temperature
@@ -166,7 +173,11 @@ print("here for some reason? Not used")
     }
 
     if( (length(idx_save)+max(nrow(par_calib_save),0)) >= n_sample_min) {
-      idx_save <- idx_save[1:(n_sample_min-nrow(par_calib_save))]
+      if (is.null(nrow(par_calib_save))) {
+        idx_save <- idx_save[1:(n_sample_min)]
+      } else {
+        idx_save <- idx_save[1:(n_sample_min-nrow(par_calib_save))]
+      }
       par_calib_save <- rbind(par_calib_save, par_calib[[cc]][idx_save,])
       par_time_save <- abind(par_time_save, time_series_samples[,idx_save,], along=2)
       par_covar_save <- abind(par_covar_save, covariance_samples[,,idx_save,], along=3)
